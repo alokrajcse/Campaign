@@ -8,18 +8,18 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Get connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-
-// Add services to the container.
+// Add services to the container
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
+//  Swagger + JWT Auth setup
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = "Campaign API", Version = "v1" });
 
-    // ?? Add JWT Auth to Swagger
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -46,17 +46,15 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
-// Register DbContext
+//  Register DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-// Register UserService
+// Register custom services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-// Add JWT authentication
+//  Add JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -74,8 +72,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+//  Add CORS policy for Angular
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
+//  Middleware order is VERY important
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -83,8 +94,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
 
+//  Must be BEFORE Authentication
+app.UseCors("AllowAngularApp");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

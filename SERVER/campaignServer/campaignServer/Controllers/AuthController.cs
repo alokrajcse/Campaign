@@ -18,7 +18,7 @@ namespace campaignServer.Controllers
         }
 
 
-        [Authorize]
+        
         [HttpPost("signup")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
