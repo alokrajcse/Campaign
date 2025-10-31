@@ -3,17 +3,21 @@ import { AuthService } from '../services/auth';
 import { Router } from '@angular/router';
 import { Campaign } from '../core/models/campaign';
 import { FormsModule } from '@angular/forms';
+import { DashboardService } from '../services/dashboard-service';
+import { CommonModule } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
+import { DarshboardDialogContent } from '../darshboard-dialog-content/darshboard-dialog-content';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard implements OnInit{
 
 
-  constructor(private auth: AuthService, private router: Router){
+  constructor(private campaignService: DashboardService, private router: Router, private auth: AuthService, private dialog: MatDialog){
   }
 
  
@@ -41,16 +45,33 @@ export class Dashboard implements OnInit{
   brands = ['Brand One', 'Brand Two', 'Brand Three'];
 
   campaigns: Campaign[] = [
-    { id: 1, name: 'Summer Sale 2025', startDate: '2025-05-01', endDate: '2025-06-30', totalLeads: 300, openRate: 40, conversionRate: 15, status: 'Active', agency: 'Agency A', buyer: 'Buyer X', brand: 'Brand One' },
-    { id: 2, name: 'Corporate Offer', startDate: '2025-02-01', endDate: '2025-04-30', totalLeads: 250, openRate: 50, conversionRate: 25, status: 'Completed', agency: 'Agency B', buyer: 'Buyer Y', brand: 'Brand Two' },
-    { id: 3, name: 'New Product Launch', startDate: '2025-08-01', endDate: '2025-09-30', totalLeads: 300, openRate: 45, conversionRate: 20, status: 'Draft', agency: 'Agency C', buyer: 'Buyer Z', brand: 'Brand Three' }
+    // { id: 1, name: 'Summer Sale 2025', startDate: '2025-05-01', endDate: '2025-06-30', totalLeads: 300, openRate: 40, conversionRate: 15, status: 'Active', agency: 'Agency A', buyer: 'Buyer X', brand: 'Brand One' },
+    // { id: 2, name: 'Corporate Offer', startDate: '2025-02-01', endDate: '2025-04-30', totalLeads: 250, openRate: 50, conversionRate: 25, status: 'Completed', agency: 'Agency B', buyer: 'Buyer Y', brand: 'Brand Two' },
+    // { id: 3, name: 'New Product Launch', startDate: '2025-08-01', endDate: '2025-09-30', totalLeads: 300, openRate: 45, conversionRate: 20, status: 'Draft', agency: 'Agency C', buyer: 'Buyer Z', brand: 'Brand Three' }
   ];
+
 
   filteredCampaigns: Campaign[] = [];
 
-  ngOnInit() {
-    this.filteredCampaigns = this.campaigns;
-  }
+  // ngOnInit() {
+
+  //   this.campaignService.getCampaigns().subscribe(response => {
+  //   this.campaigns = response;
+
+  //   this.filteredCampaigns=this.campaigns
+  //   // this.totalCampaigns = response.total;
+  // });   }
+
+
+
+   ngOnInit() {
+  this.campaignService.getCampaigns().subscribe((response: Campaign[]) => {
+    console.log('API response:', response);
+    this.campaigns = response;
+    this.filteredCampaigns = response;
+  });
+}
+
 
   applyFilters() {
     this.filteredCampaigns = this.campaigns.filter(c => {
@@ -90,5 +111,14 @@ export class Dashboard implements OnInit{
     this.router.navigate(['/login']);
 
   }
+
+  openModal(): void{
+    this.dialog.open(DarshboardDialogContent, {
+      width: '400px',
+      data:{title: "Hello dashboard"}
+    })
+  }
+
+ 
 
 }

@@ -14,43 +14,43 @@ private baseUrl = 'https://localhost:44392/api'; // <- change to your API
 constructor(private http: HttpClient) {}
 
 
-getCampaigns(page = 1, pageSize = 10, filters: any = {}): Observable<{ data: Campaign[]; total: number }> {
-// For real API, pass filters as query params. Example below uses placeholder.
-let params = new HttpParams()
-.set('page', String(page))
-.set('pageSize', String(pageSize));
+getCampaigns(page = 1, pageSize = 10, filters: any = {}): Observable<Campaign[]> {
+  // Build query params for real API
+  let params = new HttpParams()
+    .set('page', String(page))
+    .set('pageSize', String(pageSize));
 
+  Object.keys(filters).forEach((k) => {
+    if (filters[k] !== null && filters[k] !== undefined && filters[k] !== '') {
+      params = params.set(k, filters[k]);
+    }
+  });
 
-Object.keys(filters).forEach((k) => {
-if (filters[k] !== null && filters[k] !== undefined && filters[k] !== '') {
-params = params.set(k, filters[k]);
+  // ✅ Actual API call (your backend returns an array)
+  return this.http.get<Campaign[]>(`${this.baseUrl}/Campaigns`, { params });
+
+  // ---------- MOCK DATA (for demo only) ----------
+  /*
+  const mock: Campaign[] = Array.from({ length: 23 }).map((_, i) => ({
+    id: i + 1,
+    name: ['Summer Sale 2025', 'Corporate Offer', 'New Product Launch'][i % 3] + ` #${i + 1}`,
+    startDate: new Date(2025, 5 + (i % 3), 1).toISOString(),
+    endDate: new Date(2025, 6 + (i % 3), 20).toISOString(),
+    totalLeads: 100 + i * 10,
+    openRate: Math.round(Math.random() * 100),
+    conversionRate: Math.round(Math.random() * 30),
+    status: i % 2 === 0 ? 'Active' : 'Completed',
+    agency: ['Agency A', 'Agency B', 'Agency C'][i % 3],
+    buyer: ['Buyer X', 'Buyer Y'][i % 2],
+    brand: ['Brand 1', 'Brand 2', 'Brand 3'][i % 3],
+  }));
+
+  const start = (page - 1) * pageSize;
+  const pageData = mock.slice(start, start + pageSize);
+  return of(pageData);
+  */
 }
-});
 
-
-// return this.http.get<{ data: Campaign[]; total: number }>(`${this.baseUrl}/campaigns`, { params });
-
-
-// Mock data for quick dev/demo
-const mock: Campaign[] = Array.from({ length: 23 }).map((_, i) => ({
-id: i + 1,
-name: ['Summer Sale 2025', 'Corporate Offer', 'New Product Launch'][i % 3] + ` #${i + 1}`,
-startDate: new Date(2025, 5 + (i % 3), 1).toISOString(),
-endDate: new Date(2025, 6 + (i % 3), 20).toISOString(),
-totalLeads: 100 + i * 10,
-openRate: Math.round(Math.random() * 100),
-conversionRate: Math.round(Math.random() * 30),
-status: i % 2 === 0 ? 'Active' : 'Completed',
-agency: ['Agency A', 'Agency B', 'Agency C'][i % 3],
-buyer: ['Buyer X', 'Buyer Y'][i % 2],
-brand: ['Brand 1', 'Brand 2', 'Brand 3'][i % 3],
-}));
-
-
-const start = (page - 1) * pageSize;
-const pageData = mock.slice(start, start + pageSize);
-return of({ data: pageData, total: mock.length });
-}
 
 
 getDropdownValues(): Observable<{ agencies: string[]; buyers: string[]; brands: string[] }> {
