@@ -7,6 +7,7 @@ import { DashboardService } from '../services/dashboard-service';
 import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { DarshboardDialogContent } from '../darshboard-dialog-content/darshboard-dialog-content';
+import { BulkUpoadModal } from '../bulkUploadModal/bulk-upoad-modal/bulk-upoad-modal';
 
 @Component({
   selector: 'app-dashboard',
@@ -93,7 +94,11 @@ export class Dashboard implements OnInit{
   }
 
   uploadLeads() {
-    alert('Bulk Upload Leads clicked!');
+    // alert('Bulk Upload Leads clicked!');
+    this.dialog.open(BulkUpoadModal, {
+      // width: 'fit',
+      data:{title: "Hello dashboard"}
+    })
   }
 
   multiLeadSearch() {

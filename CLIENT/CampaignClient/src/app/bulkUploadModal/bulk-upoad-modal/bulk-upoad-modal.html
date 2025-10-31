@@ -1,4 +1,5 @@
-<p>bulk-upoad-modal works!</p>
+<div class="main-container">
+    <p>bulk-upoad-modal works!</p>
 <h2>Bulk Upload Leads</h2>
 
 <input 
@@ -13,7 +14,7 @@
 </div>
 
 <!-- Show preview table -->
-<table *ngIf="parsedLeads.length > 0" border="1" style="margin-top: 20px;">
+<table *ngIf="parsedLeads.length > 0"  style="margin-top: 20px;">
   <thead>
     <tr>
       <th>Lead ID</th>
@@ -36,4 +37,6 @@
 
 <div *ngIf="parsedLeads.length > 0">
   <button (click)="uploadLeads()">Upload Leads</button>
+</div>
+
 </div>
