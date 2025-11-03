@@ -15,7 +15,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-//  Swagger + JWT Auth setup
+// Swagger + JWT Auth setup
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = "Campaign API", Version = "v1" });
@@ -46,19 +46,23 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-//  Register DbContext
+// ? Register DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+// ? Register Campaign-related services
 builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
 builder.Services.AddScoped<CampaignService>();
 
+// ? Register Lead-related services
+builder.Services.AddScoped<ILeadRepository, LeadRepository>();
+builder.Services.AddScoped<ILeadService, LeadService>();
 
-// Register custom services
+// ? Register other services (User, JWT)
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-//  Add JWT Authentication
+// ? Add JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -76,7 +80,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-//  Add CORS policy for Angular
+// ? Add CORS policy for Angular
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
@@ -90,7 +94,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-//  Middleware order is VERY important
+// ? Middleware order
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -99,7 +103,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//  Must be BEFORE Authentication
+// Must be BEFORE Authentication
 app.UseCors("AllowAngularApp");
 
 app.UseAuthentication();

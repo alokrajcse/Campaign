@@ -17,6 +17,7 @@ export class BulkUpoadModal {
 
   fileName: string='';
   file: File|null=null;
+  
   parsedLeads: any[] = [];
 
    constructor(public dialogRef: MatDialogRef<BulkUpoadModal>, private campaignService: CampaignService) {}
@@ -90,6 +91,7 @@ if (!ext) {
       alert('No leads to upload!');
       return;
     }
+    
 
     // this.campaignService.bulkUploadLeads(this.parsedLeads).subscribe({
     //   next: (res) => {

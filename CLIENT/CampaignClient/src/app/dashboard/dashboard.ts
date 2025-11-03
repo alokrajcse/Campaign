@@ -69,7 +69,7 @@ export class Dashboard implements OnInit{
   this.campaignService.getCampaigns().subscribe((response: Campaign[]) => {
     console.log('API response:', response);
     this.campaigns = response;
-    this.filteredCampaigns = response;
+    this.filteredCampaigns = response.reverse();
   });
 }
 

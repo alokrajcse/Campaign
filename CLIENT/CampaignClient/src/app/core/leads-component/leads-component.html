@@ -1,0 +1,28 @@
+<h2>Leads</h2>
+
+<table border="1" cellpadding="5">
+  <thead>
+    <tr>
+      <th>Lead ID</th>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Campaign ID</th>
+      <th>Segment</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let lead of leads">
+      <td>{{ lead.leadId }}</td>
+      <td>{{ lead.name }}</td>
+      <td>{{ lead.email }}</td>
+      <td>{{ lead.phone }}</td>
+      <td>{{ lead.campaignId }}</td>
+      <td>{{ lead.segment }}</td>
+      <td>{{ lead.status }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<button (click)="downloadCsv()">Export CSV</button>

@@ -10,6 +10,9 @@ namespace campaignServer.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Campaign> Campaigns { get; set; }
 
+        public DbSet<Lead> Leads { get; set; }
+
+
 
 
 
