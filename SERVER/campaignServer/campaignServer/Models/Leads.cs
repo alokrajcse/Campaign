@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace campaignServer.Models
 {
+    [Table("leads")]
     public class Lead
     {
         public int Id { get; set; }
@@ -13,6 +14,12 @@ namespace campaignServer.Models
         public string CampaignId { get; set; } = string.Empty;
         public string? Segment { get; set; }
         public string? Status { get; set; } = "Active";
+
+        // Engagement Metrics
+        //public bool EmailOpened { get; set; } = false;
+        //public int ClickCount { get; set; } = 0;
+        ////public bool Converted { get; set; } = false;
+        //public DateTime? LastEngagementDate { get; set; }
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedDate { get; set; }

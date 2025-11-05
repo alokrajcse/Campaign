@@ -5,8 +5,15 @@
   "projects": {
     "CampaignClient": {
       "projectType": "application",
-      "schematics": {},
-      "root": "",
+    "schematics": {
+      "@schematics/angular:component": {
+        "skipTests": true
+      },
+      "@schematics/angular:service": {
+        "skipTests": true
+      }
+    }, 
+     "root": "",
       "sourceRoot": "src",
       "prefix": "app",
       "architect": {

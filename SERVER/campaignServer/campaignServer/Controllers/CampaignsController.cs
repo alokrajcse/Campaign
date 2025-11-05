@@ -1,4 +1,5 @@
 ﻿using campaignServer.Models;
+using campaignServer.Models.DTOs;
 using campaignServer.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,6 +55,15 @@ namespace campaignServer.Controllers
             return NoContent();
         }
 
+        // Analytics endpoint for campaign insights
+        [HttpGet("{id}/analytics")]
+        public async Task<IActionResult> GetCampaignAnalytics(int id)
+        {
+            var analytics = await _service.GetCampaignAnalyticsAsync(id);
+            if (analytics == null) return NotFound();
+            return Ok(analytics);
+        }
+
         // Example: bulk upload endpoint — accepts parsed leads from frontend
         [HttpPost("leads/bulk")]
         public IActionResult BulkUpload([FromBody] object payload)
@@ -62,6 +72,19 @@ namespace campaignServer.Controllers
             // Implement lead->segment mapping logic here (per your rules).
             // For now return a stubbed response.
             return Ok(new { processed = 10, updated = 2, rejected = 1 });
+        }
+
+        // Dropdown data endpoint for agencies, buyers, and brands
+        [HttpGet("dropdown-data")]
+        public IActionResult GetDropdownData()
+        {
+            var dropdownData = new
+            {
+                agencies = new[] { "Agency A", "Agency B", "Agency C" },
+                buyers = new[] { "Buyer X", "Buyer Y", "Buyer Z" },
+                brands = new[] { "Brand One", "Brand Two", "Brand Three" }
+            };
+            return Ok(dropdownData);
         }
     }
 }

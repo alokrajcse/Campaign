@@ -46,23 +46,29 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// ? Register DbContext
+// Register DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-// ? Register Campaign-related services
+// Register Campaign services
 builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
 builder.Services.AddScoped<CampaignService>();
 
-// ? Register Lead-related services
+//// ? Register Lead services (add this)/
+//builder.Services.AddScoped<ILeadRepository, LeadRepository>();
+//builder.Services.AddScoped<LeadService>();
+
+// ? Register Lead services
 builder.Services.AddScoped<ILeadRepository, LeadRepository>();
 builder.Services.AddScoped<ILeadService, LeadService>();
 
-// ? Register other services (User, JWT)
+
+// Register User + JWT services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-// ? Add JWT Authentication
+
+// Add JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -80,7 +86,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// ? Add CORS policy for Angular
+
+// Add CORS policy for Angular
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
@@ -94,7 +101,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// ? Middleware order
+// Middleware order is important
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -102,13 +109,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// Must be BEFORE Authentication
 app.UseCors("AllowAngularApp");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

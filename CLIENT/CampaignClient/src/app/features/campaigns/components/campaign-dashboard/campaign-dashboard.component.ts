@@ -1,0 +1,298 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Campaign } from '../../../../core/models';
+import { CampaignService } from '../../services/campaign.service';
+import { AuthService } from '../../../../core/services/auth';
+import { CreateCampaignComponent } from '../create-campaign/create-campaign.component';
+import { EditCampaignComponent } from '../edit-campaign/edit-campaign.component';
+import { CampaignAnalyticsComponent } from '../campaign-analytics/campaign-analytics.component';
+import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
+
+import { NavigationComponent } from '../../../../shared/components/navigation/navigation.component';
+
+@Component({
+  selector: 'app-campaign-dashboard',
+  standalone: true,
+  imports: [CommonModule, FormsModule, NavigationComponent, CreateCampaignComponent, EditCampaignComponent, CampaignAnalyticsComponent, LoadingComponent],
+  templateUrl: './campaign-dashboard.component.html',
+  styleUrls: ['./campaign-dashboard.component.css']
+})
+export class CampaignDashboardComponent implements OnInit {
+  campaigns: Campaign[] = [];
+  filteredCampaigns: Campaign[] = [];
+  showCreateModal = false;
+  showEditModal = false;
+  showAnalyticsModal = false;
+  editingCampaign: Campaign | null = null;
+  analyticsCampaign: Campaign | null = null;
+  loading = false;
+  error = '';
+  Math = Math;
+  
+  filters = {
+    name: '',
+    startDate: '',
+    endDate: '',
+    agency: '',
+    buyer: '',
+    brand: ''
+  };
+
+  agencies: string[] = [];
+  buyers: string[] = [];
+  brands: string[] = [];
+  
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 5;
+  totalItems = 0;
+  paginatedCampaigns: Campaign[] = [];
+  
+  // Sorting
+  sortField = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  constructor(
+    private campaignService: CampaignService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.loadCampaigns();
+    this.loadDropdownData();
+  }
+
+  loadCampaigns() {
+    this.loading = true;
+    this.error = '';
+    this.campaignService.getCampaigns().subscribe({
+      next: (campaigns) => {
+        // Calculate lead counts for each campaign
+        this.campaignService.getLeads().subscribe({
+          next: (leads) => {
+            campaigns.forEach(campaign => {
+              const campaignLeads = leads.filter(lead => lead.campaignId === campaign.name);
+              campaign.totalLeads = campaignLeads.length;
+            });
+            this.campaigns = campaigns;
+            this.filteredCampaigns = campaigns;
+            this.updatePagination();
+            this.loading = false;
+          },
+          error: () => {
+            // If leads fetch fails, still show campaigns with 0 counts
+            this.campaigns = campaigns;
+            this.filteredCampaigns = campaigns;
+            this.updatePagination();
+            this.loading = false;
+          }
+        });
+      },
+      error: (err) => {
+        console.error('API Error:', err);
+        if (err.status === 0) {
+          this.error = 'Cannot connect to server. Please check if the backend is running on https://localhost:44392';
+        } else if (err.status === 500) {
+          this.error = 'Server error. Please check the backend logs.';
+        } else {
+          this.error = `Failed to load campaigns: ${err.error?.message || err.message}`;
+        }
+        this.loading = false;
+      }
+    });
+  }
+
+  loadDropdownData() {
+    this.campaignService.getDropdownData().subscribe(data => {
+      this.agencies = data.agencies;
+      this.buyers = data.buyers;
+      this.brands = data.brands;
+    });
+  }
+
+  applyFilters() {
+    this.filteredCampaigns = this.campaigns.filter(campaign => {
+      return (!this.filters.name || campaign.name.toLowerCase().includes(this.filters.name.toLowerCase())) &&
+             (!this.filters.startDate || campaign.startDate >= this.filters.startDate) &&
+             (!this.filters.endDate || campaign.endDate <= this.filters.endDate) &&
+             (!this.filters.agency || campaign.agency === this.filters.agency) &&
+             (!this.filters.buyer || campaign.buyer === this.filters.buyer) &&
+             (!this.filters.brand || campaign.brand === this.filters.brand);
+    });
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  updatePagination() {
+    this.totalItems = this.filteredCampaigns.length;
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedCampaigns = this.filteredCampaigns.slice(startIndex, endIndex);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalItems / this.itemsPerPage);
+  }
+
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
+  }
+
+
+
+  sort(field: string) {
+    if (this.sortField === field) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortField = field;
+      this.sortDirection = 'asc';
+    }
+    
+    this.filteredCampaigns.sort((a: any, b: any) => {
+      const aVal = a[field];
+      const bVal = b[field];
+      
+      if (aVal < bVal) return this.sortDirection === 'asc' ? -1 : 1;
+      if (aVal > bVal) return this.sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  getSortIcon(field: string): string {
+    if (this.sortField !== field) return '(click to sort)';
+    return this.sortDirection === 'asc' ? '↑' : '↓';
+  }
+
+  getTotalLeads(): number {
+    return this.campaigns.reduce((total, campaign) => total + (campaign.totalLeads || 0), 0);
+  }
+
+  getAvgOpenRate(): number {
+    const validCampaigns = this.campaigns.filter(c => c.openRate !== undefined);
+    if (validCampaigns.length === 0) return 0;
+    const total = validCampaigns.reduce((sum, c) => sum + (c.openRate || 0), 0);
+    return Math.round(total / validCampaigns.length);
+  }
+
+  getAvgConversionRate(): number {
+    const validCampaigns = this.campaigns.filter(c => c.conversionRate !== undefined);
+    if (validCampaigns.length === 0) return 0;
+    const total = validCampaigns.reduce((sum, c) => sum + (c.conversionRate || 0), 0);
+    return Math.round(total / validCampaigns.length);
+  }
+
+  updateCampaignStatus(campaign: Campaign, event: any) {
+    const newStatus = event.target.value as 'Active' | 'Completed' | 'Draft';
+    campaign.status = newStatus;
+    // In real app, call API to update status
+    console.log(`Campaign ${campaign.name} status updated to ${newStatus}`);
+  }
+
+  viewCampaignDetails(campaign: Campaign) {
+    this.analyticsCampaign = campaign;
+    this.showAnalyticsModal = true;
+  }
+
+  editCampaign(campaign: Campaign) {
+    this.editingCampaign = { ...campaign };
+    this.showEditModal = true;
+  }
+
+  deleteCampaign(campaign: Campaign) {
+    if (confirm(`Are you sure you want to delete "${campaign.name}"?`)) {
+      this.campaignService.deleteCampaign(campaign.id!).subscribe({
+        next: () => {
+          this.campaigns = this.campaigns.filter(c => c.id !== campaign.id);
+          this.applyFilters();
+        },
+        error: () => {
+          this.error = 'Failed to delete campaign';
+        }
+      });
+    }
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editingCampaign = null;
+  }
+
+  closeAnalyticsModal() {
+    this.showAnalyticsModal = false;
+    this.analyticsCampaign = null;
+  }
+
+  onCampaignUpdated(campaign: Campaign) {
+    if (campaign && campaign.id) {
+      const index = this.campaigns.findIndex(c => c && c.id === campaign.id);
+      if (index !== -1) {
+        this.campaigns[index] = campaign;
+        this.applyFilters();
+      }
+    }
+    this.showEditModal = false;
+    this.editingCampaign = null;
+  }
+
+  resetFilters() {
+    this.filters = { name: '', startDate: '', endDate: '', agency: '', buyer: '', brand: '' };
+    this.filteredCampaigns = this.campaigns;
+    this.currentPage = 1;
+    this.updatePagination();
+  }
+
+  navigateToAddLead() {
+    this.router.navigate(['/campaigns/add-lead']);
+  }
+
+  navigateToBulkUpload() {
+    this.router.navigate(['/campaigns/bulk-upload']);
+  }
+
+  navigateToSearch() {
+    this.router.navigate(['/campaigns/search']);
+  }
+
+  exportData() {
+    this.campaignService.exportLeads('csv').subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'leads-export.csv';
+      a.click();
+    });
+  }
+
+  openCreateModal() {
+    this.showCreateModal = true;
+  }
+
+  closeCreateModal() {
+    this.showCreateModal = false;
+  }
+
+  onCampaignCreated(campaign: Campaign) {
+    this.campaigns.unshift(campaign);
+    this.filteredCampaigns = [...this.campaigns];
+    this.showCreateModal = false;
+    this.loadCampaigns(); // Refresh to get updated counts
+    this.loadDropdownData(); // Refresh dropdown data
+  }
+
+  refreshData() {
+    this.loadCampaigns();
+  }
+
+
+
+
+}

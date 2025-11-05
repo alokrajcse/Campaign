@@ -11,5 +11,9 @@ namespace campaignServer.Services
         Task AddAsync(Lead lead);
         Task UpdateAsync(Lead lead);
         Task SaveAsync();
+        Task<List<Lead>> GetByLeadIdsOrEmailsAsync(List<string> identifiers);
+        Task<List<Lead>> GetAllAsync();
+
+
     }
 }

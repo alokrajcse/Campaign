@@ -51,5 +51,23 @@ namespace campaignServer.Services
 
             return await query.ToListAsync();
         }
+
+        public async Task<List<Lead>> GetByLeadIdsOrEmailsAsync(List<string> identifiers)
+        {
+            if (identifiers == null || identifiers.Count == 0)
+                return new List<Lead>();
+
+            var lowered = identifiers.Select(x => x.ToLower()).ToList();
+
+            return await _context.Leads
+                .Where(l => lowered.Contains(l.LeadId.ToLower()) || lowered.Contains(l.Email.ToLower()))
+                .ToListAsync();
+        }
+        public async Task<List<Lead>> GetAllAsync()
+        {
+            return await _context.Leads.ToListAsync();
+        }
+
+
     }
 }

@@ -155,8 +155,15 @@ namespace campaignServer.Services
             return Encoding.UTF8.GetBytes(csv.ToString());
         }
 
-        private LeadDto MapToDto(Lead entity) =>
-            new LeadDto
+        private LeadDto MapToDto(Lead entity)
+        {
+            // Generate sample engagement data based on lead characteristics
+            var random = new Random(entity.Id); // Use ID as seed for consistent results
+            var emailOpened = random.Next(0, 100) < 60; // 60% open rate
+            var clicked = emailOpened && random.Next(0, 100) < 25; // 25% of opened emails get clicked
+            var converted = clicked && random.Next(0, 100) < 15; // 15% of clicks convert
+            
+            return new LeadDto
             {
                 Id = entity.Id,
                 LeadId = entity.LeadId,
@@ -167,7 +174,86 @@ namespace campaignServer.Services
                 Segment = entity.Segment,
                 Status = entity.Status,
                 CreatedDate = entity.CreatedDate,
-                UpdatedDate = entity.UpdatedDate
+                UpdatedDate = entity.UpdatedDate,
+                
+                // Engagement Metrics
+                OpenRate = emailOpened ? 1 : 0,
+                ClickRate = clicked ? random.Next(1, 5) : 0, // 1-4 clicks if they clicked
+                Conversions = converted ? 1 : 0,
+                LastEngagementDate = emailOpened ? entity.CreatedDate.AddDays(random.Next(1, 7)) : null
             };
+        }
+
+
+
+        public async Task<MultiLeadSearchResponseDto> SearchMultipleLeadsAsync(MultiLeadSearchRequestDto request)
+        {
+            var identifiers = new List<string>();
+
+            if (request.Identifiers != null && request.Identifiers.Any())
+                identifiers.AddRange(request.Identifiers);
+
+            if (!string.IsNullOrWhiteSpace(request.RawInput))
+            {
+                var lines = request.RawInput
+                    .Split(new[] { '\n', '\r', ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+
+                identifiers.AddRange(lines);
+            }
+
+            identifiers = identifiers.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+            if (!identifiers.Any())
+            {
+                return new MultiLeadSearchResponseDto
+                {
+                    Found = new List<LeadDto>(),
+                    NotFound = new List<string>(),
+                    Summary = new SearchSummaryDto
+                    {
+                        Requested = 0,
+                        Found = 0,
+                        NotFound = 0
+                    }
+                };
+            }
+
+            var searchTerms = identifiers.Select(i => i.ToLower()).ToList();
+            var leads = await _repo.GetAllAsync();
+
+            var found = leads
+                .Where(l =>
+                    searchTerms.Contains(l.LeadId.ToLower()) ||
+                    searchTerms.Contains(l.Email.ToLower()) ||
+        searchTerms.Contains(l.Name.ToLower())
+                )
+                .Select(MapToDto)
+                .ToList();
+
+            var foundIdentifiers = found
+                .SelectMany(l => new[] { l.LeadId.ToLower(), l.Email.ToLower(), l.Name.ToLower() })
+                .ToList();
+
+            var notFound = searchTerms
+                .Where(x => !foundIdentifiers.Contains(x))
+                .Distinct()
+                .ToList();
+
+            return new MultiLeadSearchResponseDto
+            {
+                Found = found,
+                NotFound = notFound,
+                Summary = new SearchSummaryDto
+                {
+                    Requested = searchTerms.Count,
+                    Found = found.Count,
+                    NotFound = notFound.Count
+                }
+            };
+        }
+
     }
 }

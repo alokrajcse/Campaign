@@ -19,6 +19,12 @@ namespace campaignServer.Models.DTOs
         public int Id { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        
+        // Engagement Metrics
+        public int OpenRate { get; set; } = 0;      // 1 if opened, 0 if not
+        public int ClickRate { get; set; } = 0;     // Number of clicks on marketing links
+        public int Conversions { get; set; } = 0;   // 1 if converted, 0 if not
+        public DateTime? LastEngagementDate { get; set; }
     }
 
     public class BulkLeadRequestDto
@@ -47,5 +53,26 @@ namespace campaignServer.Models.DTOs
             public string LeadId { get; set; } = string.Empty;
             public string Reason { get; set; } = string.Empty;
         }
+    }
+
+
+    public class MultiLeadSearchRequestDto
+    {
+        public List<string>? Identifiers { get; set; } // LeadIds or Emails
+        public string? RawInput { get; set; } // multi-line input
+    }
+
+    public class MultiLeadSearchResponseDto
+    {
+        public List<LeadDto> Found { get; set; } = new();
+        public List<string> NotFound { get; set; } = new();
+        public SearchSummaryDto Summary { get; set; } = new();
+    }
+
+    public class SearchSummaryDto
+    {
+        public int Requested { get; set; }
+        public int Found { get; set; }
+        public int NotFound { get; set; }
     }
 }

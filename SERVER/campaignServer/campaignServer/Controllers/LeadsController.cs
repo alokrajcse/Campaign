@@ -54,5 +54,15 @@ namespace campaignServer.Controllers
             var bytes = await _service.ExportLeadsAsync(format, campaignId, segment);
             return File(bytes, "text/csv", "leads.csv");
         }
+
+
+        [HttpPost("multi-search")]
+        public async Task<ActionResult<MultiLeadSearchResponseDto>> MultiSearch([FromBody] MultiLeadSearchRequestDto request)
+        {
+            var result = await _service.SearchMultipleLeadsAsync(request);
+            return Ok(result);
+        }
+
+
     }
 }
