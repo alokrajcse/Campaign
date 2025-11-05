@@ -1,0 +1,60 @@
+<app-navigation></app-navigation>
+<div class="main-content">
+  <div class="leads-container">
+    <header class="page-header">
+      <h2>All Leads</h2>
+    </header>
+
+    <div class="filters-section">
+      <input [(ngModel)]="filters.campaign" placeholder="Filter by Campaign" (input)="applyFilters()">
+      <input [(ngModel)]="filters.segment" placeholder="Filter by Segment" (input)="applyFilters()">
+      <input [(ngModel)]="filters.email" placeholder="Filter by Email" (input)="applyFilters()">
+      <button (click)="resetFilters()">Reset</button>
+    </div>
+
+    <div class="leads-table" *ngIf="!loading">
+      <table>
+        <thead>
+          <tr>
+            <th>Lead ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Campaign</th>
+            <th>Segment</th>
+            <th>Status</th>
+            <th>Created Date</th>
+            <th class="actions-column">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let lead of paginatedLeads">
+            <td>{{lead.leadId}}</td>
+            <td>{{lead.name}}</td>
+            <td>{{lead.email}}</td>
+            <td>{{lead.phone}}</td>
+            <td>{{lead.campaignId}}</td>
+            <td class="segment">{{lead.segment}}</td>
+            <td class="status">{{lead.status}}</td>
+            <td>{{formatDate(lead.createdDate)}}</td>
+            <td class="actions-column">
+              <img src="/icons/pen.png" class="action-icon" (click)="editLead(lead)" title="Edit">
+              <img src="/icons/bin.png" class="action-icon" (click)="deleteLead(lead)" title="Delete">
+            </td>
+          </tr>
+          <tr *ngIf="filteredLeads.length === 0">
+            <td colspan="9" class="no-data">No leads found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="loading" *ngIf="loading">Loading leads...</div>
+
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+      <span>Page {{currentPage}} of {{totalPages}}</span>
+      <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+    </div>
+  </div>
+</div>

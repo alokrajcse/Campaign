@@ -1,18 +1,18 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import * as XLSX from 'xlsx';
+
 import { Lead, BulkUploadResult } from '../../../../core/models';
 import { CampaignService } from '../../services/campaign.service';
 import { SegmentMappingService } from '../../services/segment-mapping.service';
-import { NavigationComponent } from '../../../../shared/components/navigation/navigation.component';
+import { NavigationComponent } from '../../../../shared/components/navigation/navigation';
 
 @Component({
   selector: 'app-bulk-upload',
   standalone: true,
   imports: [CommonModule, NavigationComponent],
-  templateUrl: './bulk-upload.component.html',
-  styleUrls: ['./bulk-upload.component.css']
+  templateUrl: './bulk-upload.html',
+  styleUrls: ['./bulk-upload.css']
 })
 export class BulkUploadComponent {
   selectedFile: File | null = null;
@@ -57,10 +57,9 @@ export class BulkUploadComponent {
     }
 
     // File type validation
-    const allowedTypes = ['.xlsx', '.xls', '.csv'];
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-    if (!allowedTypes.includes(fileExtension)) {
-      this.validationErrors = ['Only Excel (.xlsx, .xls) and CSV files are allowed'];
+    if (fileExtension !== '.csv') {
+      this.validationErrors = ['Only CSV files are allowed'];
       return;
     }
 
@@ -74,24 +73,33 @@ export class BulkUploadComponent {
 
     const reader = new FileReader();
     reader.onload = (e: any) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-      this.previewData = jsonData.map((row: any) => ({
-        leadId: String(row['Lead ID'] || row['leadId'] || ''),
-        name: String(row['Name'] || row['name'] || ''),
-        email: String(row['Email'] || row['email'] || ''),
-        phone: String(row['Phone'] || row['phone'] || ''),
-        campaignId: String(row['Campaign'] || row['campaignId'] || ''),
-        segment: ''
-      }));
+      const csvText = e.target.result;
+      const lines = csvText.split('\n');
+      const headers = lines[0].split(',').map((h: string) => h.trim());
+      
+      this.previewData = lines.slice(1)
+        .filter((line: string) => line.trim())
+        .map((line: string) => {
+          const values = line.split(',').map((v: string) => v.trim());
+          const row: any = {};
+          headers.forEach((header: string, index: number) => {
+            row[header] = values[index] || '';
+          });
+          
+          return {
+            leadId: String(row['Lead ID'] || row['leadId'] || ''),
+            name: String(row['Name'] || row['name'] || ''),
+            email: String(row['Email'] || row['email'] || ''),
+            phone: String(row['Phone'] || row['phone'] || ''),
+            campaignId: String(row['Campaign'] || row['campaignId'] || ''),
+            segment: ''
+          };
+        });
 
       this.validateData();
       this.assignSegments();
     };
-    reader.readAsArrayBuffer(this.selectedFile);
+    reader.readAsText(this.selectedFile);
   }
 
   validateData() {

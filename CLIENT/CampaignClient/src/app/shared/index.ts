@@ -1,3 +1,3 @@
 // Components
-export * from './components/navigation/navigation.component';
-export * from './components/loading/loading.component';
+export * from './components/navigation/navigation';
+export * from './components/loading/loading';

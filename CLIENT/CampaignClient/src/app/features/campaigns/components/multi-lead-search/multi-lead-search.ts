@@ -4,14 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Lead, SearchResult } from '../../../../core/models';
 import { CampaignService } from '../../services/campaign.service';
-import { NavigationComponent } from '../../../../shared/components/navigation/navigation.component';
+import { NavigationComponent } from '../../../../shared/components/navigation/navigation';
 
 @Component({
   selector: 'app-multi-lead-search',
   standalone: true,
   imports: [CommonModule, FormsModule, NavigationComponent],
-  templateUrl: './multi-lead-search.component.html',
-  styleUrls: ['./multi-lead-search.component.css']
+  templateUrl: './multi-lead-search.html',
+  styleUrls: ['./multi-lead-search.css']
 })
 export class MultiLeadSearchComponent {
   searchInput = '';

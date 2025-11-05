@@ -5,19 +5,18 @@ import { Router } from '@angular/router';
 import { Campaign } from '../../../../core/models';
 import { CampaignService } from '../../services/campaign.service';
 import { AuthService } from '../../../../core/services/auth';
-import { CreateCampaignComponent } from '../create-campaign/create-campaign.component';
-import { EditCampaignComponent } from '../edit-campaign/edit-campaign.component';
-import { CampaignAnalyticsComponent } from '../campaign-analytics/campaign-analytics.component';
-import { LoadingComponent } from '../../../../shared/components/loading/loading.component';
-
-import { NavigationComponent } from '../../../../shared/components/navigation/navigation.component';
+import { CreateCampaignComponent } from '../create-campaign/create-campaign';
+import { EditCampaignComponent } from '../edit-campaign/edit-campaign';
+import { CampaignAnalyticsComponent } from '../campaign-analytics/campaign-analytics';
+import { LoadingComponent } from '../../../../shared/components/loading/loading';
+import { NavigationComponent } from '../../../../shared/components/navigation/navigation';
 
 @Component({
   selector: 'app-campaign-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule, NavigationComponent, CreateCampaignComponent, EditCampaignComponent, CampaignAnalyticsComponent, LoadingComponent],
-  templateUrl: './campaign-dashboard.component.html',
-  styleUrls: ['./campaign-dashboard.component.css']
+  templateUrl: './campaign-dashboard.html',
+  styleUrls: ['./campaign-dashboard.css']
 })
 export class CampaignDashboardComponent implements OnInit {
   campaigns: Campaign[] = [];

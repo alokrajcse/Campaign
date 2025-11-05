@@ -5,14 +5,14 @@ import { Router } from '@angular/router';
 import { Lead } from '../../../../core/models';
 import { CampaignService } from '../../services/campaign.service';
 import { SegmentMappingService } from '../../services/segment-mapping.service';
-import { NavigationComponent } from '../../../../shared/components/navigation/navigation.component';
+import { NavigationComponent } from '../../../../shared/components/navigation/navigation';
 
 @Component({
   selector: 'app-add-lead',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, NavigationComponent],
-  templateUrl: './add-lead.component.html',
-  styleUrls: ['./add-lead.component.css']
+  templateUrl: './add-lead.html',
+  styleUrls: ['./add-lead.css']
 })
 export class AddLeadComponent implements OnInit {
   leadForm: FormGroup;

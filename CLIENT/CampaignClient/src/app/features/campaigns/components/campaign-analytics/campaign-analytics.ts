@@ -7,8 +7,8 @@ import { CampaignService } from '../../services/campaign.service';
   selector: 'app-campaign-analytics',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './campaign-analytics.component.html',
-  styleUrls: ['./campaign-analytics.component.css']
+  templateUrl: './campaign-analytics.html',
+  styleUrls: ['./campaign-analytics.css']
 })
 export class CampaignAnalyticsComponent implements OnInit {
   @Input() campaign!: Campaign;
