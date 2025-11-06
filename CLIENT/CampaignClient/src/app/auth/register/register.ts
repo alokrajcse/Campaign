@@ -23,9 +23,14 @@ export class Register {
   register(){
     this.auth.signup({username: this.username, email:this.email, password:this.password})
     .subscribe({
-      next: () => alert('RESISTER SCCESS'),
-      error: (e: any) => alert("Error: "+ e.message)
+      next: () => alert('Registration successful!'),
+      error: (e: any) => {
+        if (e.status === 400) {
+          alert('This email is already used, try another');
+        } else {
+          alert('Registration failed');
+        }
+      }
     });
-
   }
 }

@@ -25,10 +25,11 @@ namespace campaignServer.Controllers
             var result = await _userService.RegisterAsync(request);
             if (!result)
             {
-                return BadRequest(new { message = "Email already exists." });
+                return BadRequest("Email already exists.");
+
             }
 
-            return Ok(new { message = "Registration successful" });
+            return Ok(result);
         }
 
         [HttpPost("signin")]
