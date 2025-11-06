@@ -136,3 +136,91 @@ th {
   width: 200px;
   min-width: 100px;
 }
+
+/* Responsive Leads List */
+@media (max-width: 1024px) {
+  .leads-container {
+    max-width: 100%;
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 10px;
+  }
+  
+  .leads-container {
+    padding: 0 5px;
+  }
+  
+  .filters-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .filters-section input {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .filters-section button {
+    width: 100%;
+  }
+  
+  .leads-table {
+    overflow-x: auto;
+  }
+  
+  table {
+    min-width: 800px;
+    font-size: 12px;
+  }
+  
+  th, td {
+    padding: 8px 4px;
+  }
+  
+  .segment {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+  
+  .action-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 5px;
+  }
+  
+  .page-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  table {
+    font-size: 11px;
+  }
+  
+  th, td {
+    padding: 6px 2px;
+  }
+  
+  .action-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .segment {
+    font-size: 9px;
+  }
+}

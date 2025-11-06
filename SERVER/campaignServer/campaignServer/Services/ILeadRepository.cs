@@ -13,7 +13,6 @@ namespace campaignServer.Services
         Task SaveAsync();
         Task<List<Lead>> GetByLeadIdsOrEmailsAsync(List<string> identifiers);
         Task<List<Lead>> GetAllAsync();
-
-
+        Task DeleteAsync(string leadId);
     }
 }

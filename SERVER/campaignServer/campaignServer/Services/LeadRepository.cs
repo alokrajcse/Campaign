@@ -68,6 +68,13 @@ namespace campaignServer.Services
             return await _context.Leads.ToListAsync();
         }
 
-
+        public async Task DeleteAsync(string leadId)
+        {
+            var lead = await _context.Leads.FirstOrDefaultAsync(l => l.LeadId == leadId);
+            if (lead != null)
+            {
+                _context.Leads.Remove(lead);
+            }
+        }
     }
 }

@@ -274,3 +274,100 @@
   width: 90px;
   min-width: 90px;
 }
+
+/* Responsive Dashboard */
+@media (max-width: 1024px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+  
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+  
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .summary-card {
+    padding: 15px;
+  }
+  
+  .summary-card h3 {
+    font-size: 24px;
+  }
+  
+  .filters-section {
+    padding: 15px;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .filter-row input, .filter-row select {
+    min-width: auto;
+  }
+  
+  .actions-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .campaigns-table {
+    overflow-x: auto;
+  }
+  
+  .campaigns-table table {
+    min-width: 800px;
+  }
+  
+  .campaigns-table th, .campaigns-table td {
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+  .action-icon {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .summary-card h3 {
+    font-size: 20px;
+  }
+  
+  .campaigns-table th, .campaigns-table td {
+    padding: 6px 4px;
+    font-size: 11px;
+  }
+  
+  .action-icon {
+    width: 25px;
+    height: 25px;
+  }
+  
+  .primary-btn, .secondary-btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}

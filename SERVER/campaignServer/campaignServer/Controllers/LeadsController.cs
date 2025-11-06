@@ -63,6 +63,14 @@ namespace campaignServer.Controllers
             return Ok(result);
         }
 
-
+        [HttpDelete("{leadId}")]
+        public async Task<IActionResult> DeleteLead(string leadId)
+        {
+            var result = await _service.DeleteLeadAsync(leadId);
+            if (!result)
+                return NotFound("Lead not found");
+            
+            return Ok("Lead deleted successfully");
+        }
     }
 }

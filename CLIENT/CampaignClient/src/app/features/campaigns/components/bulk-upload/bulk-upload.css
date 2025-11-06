@@ -11,6 +11,7 @@
 .page-header h2 {
   margin: 0;
   color: #2c3e50;
+  text-align: center;
 }
 
 .upload-section {
@@ -183,4 +184,73 @@
 .pagination span {
   font-size: 14px;
   color: #666;
+}
+
+/* Responsive Bulk Upload */
+@media (max-width: 1024px) {
+  .bulk-upload-container {
+    max-width: 100%;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bulk-upload-container {
+    padding: 10px;
+  }
+  
+  .upload-section {
+    padding: 20px;
+  }
+  
+  .file-upload {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .upload-btn, .sample-btn {
+    width: 100%;
+  }
+  
+  .result-stats {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .table-container {
+    font-size: 12px;
+  }
+  
+  .table-container th, .table-container td {
+    padding: 6px 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bulk-upload-container {
+    padding: 5px;
+  }
+  
+  .upload-section {
+    padding: 15px;
+  }
+  
+  .page-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .upload-btn-action {
+    width: 100%;
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+  
+  .table-container {
+    font-size: 11px;
+  }
+  
+  .table-container th, .table-container td {
+    padding: 4px 2px;
+  }
 }

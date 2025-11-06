@@ -11,6 +11,7 @@
 .page-header h2 {
   margin: 0;
   color: #2c3e50;
+  text-align: center;
 }
 
 .form-container {
@@ -92,4 +93,39 @@
   background: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+}
+
+/* Responsive Add Lead */
+@media (max-width: 768px) {
+  .add-lead-container {
+    padding: 10px;
+    max-width: 100%;
+  }
+  
+  .form-container {
+    padding: 20px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .submit-btn, .cancel-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-lead-container {
+    padding: 5px;
+  }
+  
+  .form-container {
+    padding: 15px;
+  }
+  
+  .page-header h2 {
+    font-size: 1.5rem;
+  }
 }

@@ -13,9 +13,7 @@ namespace campaignServer.Services
         Task<List<LeadDto>> GetLeadsAsync(string? campaignId, string? segment, string? email);
         Task<LeadDto> UpdateLeadAsync(string leadId, LeadCreateDto dto);
         Task<byte[]> ExportLeadsAsync(string format, string? campaignId, string? segment);
-        //Task<MultiLeadSearchResponseDto> SearchMultipleLeadsAsync(MultiLeadSearchRequestDto req);
         Task<MultiLeadSearchResponseDto> SearchMultipleLeadsAsync(MultiLeadSearchRequestDto request);
-
-
+        Task<bool> DeleteLeadAsync(string leadId);
     }
 }

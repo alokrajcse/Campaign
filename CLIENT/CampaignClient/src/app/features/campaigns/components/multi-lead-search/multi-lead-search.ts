@@ -88,17 +88,36 @@ export class MultiLeadSearchComponent {
   }
 
   exportResults() {
-    if (!this.searchResult || (!this.searchResult.found?.length && !this.searchResult.notFound?.length)) {
+    if (!this.searchResult?.found?.length) {
       return;
     }
 
-    this.campaignService.exportLeads('csv').subscribe(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'search-results.csv';
-      a.click();
-    });
+    const csvContent = this.generateCSV(this.searchResult.found);
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'search-results.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  private generateCSV(leads: Lead[]): string {
+    const headers = ['Lead ID', 'Name', 'Email', 'Phone', 'Campaign', 'Segment', 'Status', 'Created Date'];
+    const rows = leads.map(lead => [
+      lead.leadId || '',
+      lead.name || '',
+      lead.email || '',
+      lead.phone || '',
+      lead.campaignId || '',
+      lead.segment || '',
+      lead.status || '',
+      lead.createdDate ? new Date(lead.createdDate).toLocaleDateString() : ''
+    ]);
+    
+    return [headers, ...rows]
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n');
   }
 
   clearSearch() {

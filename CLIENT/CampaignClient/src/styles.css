@@ -1,4 +1,6 @@
 /* Global Styles */
+@import './responsive-utils.css';
+
 * {
   box-sizing: border-box;
 }
@@ -163,7 +165,19 @@ body {
   background: #ffffff;
 }
 
-/* Mobile Responsive Styles */
+/* Responsive Design */
+/* Tablet Styles */
+@media (max-width: 1024px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .main-content {
+    padding: 15px;
+  }
+}
+
+/* Mobile Styles */
 @media (max-width: 768px) {
   body {
     margin-left: 0;
@@ -171,72 +185,73 @@ body {
   
   .main-content {
     margin-left: 0;
-  }
-  .dashboard-container {
     padding: 10px;
   }
   
-  .summary-cards {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+  .container {
+    padding: 10px;
   }
   
-  .summary-card {
+  /* Tables */
+  .table {
+    font-size: 12px;
+  }
+  
+  .table th, .table td {
+    padding: 8px 4px;
+  }
+  
+  /* Forms */
+  .form-control {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Buttons */
+  .btn {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+  
+  /* Cards */
+  .card {
     padding: 15px;
+    margin-bottom: 15px;
   }
   
-  .summary-card h3 {
-    font-size: 24px;
-  }
-  
-  .filters-section {
-    padding: 15px;
-  }
-  
-  .filter-row {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .actions-section {
+  /* Flex layouts */
+  .d-flex {
     flex-wrap: wrap;
-    gap: 10px;
   }
   
-  .campaigns-table {
-    overflow-x: auto;
-  }
-  
-  .campaigns-table table {
-    min-width: 800px;
-  }
-  
-  .pagination {
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-  
-  .pagination-info {
-    margin-left: 0;
-    margin-top: 10px;
-    width: 100%;
-    text-align: center;
+  .gap-3 {
+    gap: 0.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .summary-cards {
-    grid-template-columns: 1fr;
+  .container {
+    padding: 5px;
   }
   
-  .auth-card, .login-box, .signup-box {
-    padding: 20px;
-    margin: 10px;
+  .main-content {
+    padding: 5px;
   }
   
-  .modal-content {
-    width: 95vw;
-    padding: 20px;
+  .card {
+    padding: 10px;
+  }
+  
+  .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .table {
+    font-size: 11px;
+  }
+  
+  .table th, .table td {
+    padding: 6px 2px;
   }
 }
 

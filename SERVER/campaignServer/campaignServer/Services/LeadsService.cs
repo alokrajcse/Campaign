@@ -255,5 +255,15 @@ namespace campaignServer.Services
             };
         }
 
+        public async Task<bool> DeleteLeadAsync(string leadId)
+        {
+            var existing = await _repo.GetByLeadIdAsync(leadId);
+            if (existing == null)
+                return false;
+
+            await _repo.DeleteAsync(leadId);
+            await _repo.SaveAsync();
+            return true;
+        }
     }
 }

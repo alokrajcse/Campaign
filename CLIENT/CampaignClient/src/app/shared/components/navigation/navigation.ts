@@ -13,6 +13,7 @@ import { AuthService } from '../../../core/services/auth';
 export class NavigationComponent implements OnInit, OnDestroy {
   remainingTime = 1800; // 30 minutes in seconds
   private timer: any;
+  isMobileMenuOpen = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -55,5 +56,13 @@ export class NavigationComponent implements OnInit, OnDestroy {
     }
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen = false;
   }
 }

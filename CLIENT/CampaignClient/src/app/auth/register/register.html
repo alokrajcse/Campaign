@@ -14,6 +14,7 @@
           name="username"
           placeholder="Username"
           required>
+        <div class="error" *ngIf="errors.username">{{errors.username}}</div>
       </div>
       
       <div class="input-group">
@@ -23,6 +24,7 @@
           name="email"
           placeholder="Email"
           required>
+        <div class="error" *ngIf="errors.email">{{errors.email}}</div>
       </div>
       
       <div class="input-group">
@@ -32,6 +34,7 @@
           name="password"
           placeholder="Password"
           required>
+        <div class="error" *ngIf="errors.password">{{errors.password}}</div>
       </div>
       
       <button type="button" (click)="register()" class="signup-btn">Sign Up</button>
