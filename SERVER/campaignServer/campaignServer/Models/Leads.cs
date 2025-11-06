@@ -16,10 +16,9 @@ namespace campaignServer.Models
         public string? Status { get; set; } = "Active";
 
         // Engagement Metrics
-        //public bool EmailOpened { get; set; } = false;
-        //public int ClickCount { get; set; } = 0;
-        ////public bool Converted { get; set; } = false;
-        //public DateTime? LastEngagementDate { get; set; }
+        public int OpenRate { get; set; } = 0;
+        public int ClickRate { get; set; } = 0;
+        public int Conversions { get; set; } = 0;
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedDate { get; set; }

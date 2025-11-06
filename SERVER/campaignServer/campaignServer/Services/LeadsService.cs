@@ -12,7 +12,12 @@ namespace campaignServer.Services
     public class LeadService : ILeadService
     {
         private readonly ILeadRepository _repo;
-        public LeadService(ILeadRepository repo) => _repo = repo;
+        private readonly ICampaignRepository _campaignRepo;
+        public LeadService(ILeadRepository repo, ICampaignRepository campaignRepo) 
+        {
+            _repo = repo;
+            _campaignRepo = campaignRepo;
+        }
 
         public async Task<LeadDto> AddLeadAsync(LeadCreateDto dto)
         {
@@ -29,11 +34,28 @@ namespace campaignServer.Services
                 Phone = dto.Phone,
                 CampaignId = dto.CampaignId,
                 Segment = segment,
-                Status = dto.Status
+                Status = dto.Status,
+                OpenRate = dto.OpenRate,
+                ClickRate = dto.ClickRate,
+                Conversions = dto.Conversions
             };
 
             await _repo.AddAsync(entity);
             await _repo.SaveAsync();
+            
+            // Update campaign metrics when lead is added
+            try
+            {
+                Console.WriteLine($"Lead added successfully. Updating metrics for campaign: '{dto.CampaignId}'");
+                await UpdateCampaignMetrics(dto.CampaignId);
+                Console.WriteLine($"Campaign metrics updated successfully for: '{dto.CampaignId}'");
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the lead creation
+                Console.WriteLine($"Error updating campaign metrics: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
 
             return MapToDto(entity);
         }
@@ -65,7 +87,10 @@ namespace campaignServer.Services
                         Phone = l.Phone,
                         CampaignId = l.CampaignId,
                         Segment = segment,
-                        Status = l.Status
+                        Status = l.Status,
+                        OpenRate = l.OpenRate,
+                        ClickRate = l.ClickRate,
+                        Conversions = l.Conversions
                     });
                     summary.Inserted++;
                 }
@@ -77,12 +102,23 @@ namespace campaignServer.Services
                     existing.CampaignId = l.CampaignId;
                     existing.Segment = segment;
                     existing.Status = l.Status;
+                    existing.OpenRate = l.OpenRate;
+                    existing.ClickRate = l.ClickRate;
+                    existing.Conversions = l.Conversions;
                     await _repo.UpdateAsync(existing);
                     summary.Updated++;
                 }
             }
 
             await _repo.SaveAsync();
+            
+            // Update campaign metrics for all affected campaigns
+            var affectedCampaigns = req.Leads.Select(l => l.CampaignId).Distinct();
+            foreach (var campaignId in affectedCampaigns)
+            {
+                await UpdateCampaignMetrics(campaignId);
+            }
+            
             return summary;
         }
 
@@ -133,6 +169,9 @@ namespace campaignServer.Services
             existing.CampaignId = dto.CampaignId;
             existing.Segment = dto.Segment ?? SegmentMapper.AssignSegment(dto.CampaignId, dto.Email, dto.Phone);
             existing.Status = dto.Status;
+            existing.OpenRate = dto.OpenRate;
+            existing.ClickRate = dto.ClickRate;
+            existing.Conversions = dto.Conversions;
             existing.UpdatedDate = System.DateTime.UtcNow;
 
             await _repo.UpdateAsync(existing);
@@ -157,12 +196,6 @@ namespace campaignServer.Services
 
         private LeadDto MapToDto(Lead entity)
         {
-            // Generate sample engagement data based on lead characteristics
-            var random = new Random(entity.Id); // Use ID as seed for consistent results
-            var emailOpened = random.Next(0, 100) < 60; // 60% open rate
-            var clicked = emailOpened && random.Next(0, 100) < 25; // 25% of opened emails get clicked
-            var converted = clicked && random.Next(0, 100) < 15; // 15% of clicks convert
-            
             return new LeadDto
             {
                 Id = entity.Id,
@@ -176,11 +209,11 @@ namespace campaignServer.Services
                 CreatedDate = entity.CreatedDate,
                 UpdatedDate = entity.UpdatedDate,
                 
-                // Engagement Metrics
-                OpenRate = emailOpened ? 1 : 0,
-                ClickRate = clicked ? random.Next(1, 5) : 0, // 1-4 clicks if they clicked
-                Conversions = converted ? 1 : 0,
-                LastEngagementDate = emailOpened ? entity.CreatedDate.AddDays(random.Next(1, 7)) : null
+                // Use stored engagement metrics
+                OpenRate = entity.OpenRate,
+                ClickRate = entity.ClickRate,
+                Conversions = entity.Conversions,
+                LastEngagementDate = entity.OpenRate > 0 ? entity.CreatedDate.AddDays(1) : null
             };
         }
 
@@ -264,6 +297,52 @@ namespace campaignServer.Services
             await _repo.DeleteAsync(leadId);
             await _repo.SaveAsync();
             return true;
+        }
+
+        public async Task UpdateCampaignMetricsManually(string campaignName)
+        {
+            await UpdateCampaignMetrics(campaignName);
+        }
+        
+        private async Task UpdateCampaignMetrics(string campaignName)
+        {
+            Console.WriteLine($"Updating metrics for campaign: {campaignName}");
+            
+            var campaigns = await _campaignRepo.GetAllAsync();
+            var campaign = campaigns.FirstOrDefault(c => c.Name.Equals(campaignName, StringComparison.OrdinalIgnoreCase));
+            
+            if (campaign == null) 
+            {
+                Console.WriteLine($"Campaign not found: {campaignName}. Available campaigns: {string.Join(", ", campaigns.Select(c => c.Name))}");
+                return;
+            }
+            
+            var leads = await _repo.GetFilteredLeadsAsync(campaignName, null, null);
+            var totalLeads = leads.Count();
+            
+            Console.WriteLine($"Found {totalLeads} leads for campaign {campaignName}");
+            
+            if (totalLeads > 0)
+            {
+                // Calculate actual engagement metrics from lead data
+                var totalOpens = leads.Sum(l => l.OpenRate);
+                var totalClicks = leads.Sum(l => l.ClickRate);
+                var totalConversions = leads.Sum(l => l.Conversions);
+                
+                // Update campaign with calculated values
+                var oldOpenRate = campaign.OpenRate;
+                campaign.TotalLeads = totalLeads;
+                campaign.OpenRate = totalLeads > 0 ? (int)((totalOpens * 100.0) / totalLeads) : 0;
+                campaign.ClickRate = totalLeads > 0 ? (int)((totalClicks * 100.0) / totalLeads) : 0;
+                campaign.ConversionRate = totalLeads > 0 ? (int)((totalConversions * 100.0) / totalLeads) : 0;
+                campaign.Revenue = totalConversions * 150; // $150 average revenue per conversion
+                
+                Console.WriteLine($"Calculated from {totalLeads} leads: Opens={totalOpens}, Clicks={totalClicks}, Conversions={totalConversions}");
+                Console.WriteLine($"Updated metrics - OpenRate: {oldOpenRate} -> {campaign.OpenRate}, ClickRate: {campaign.ClickRate}, ConversionRate: {campaign.ConversionRate}");
+                
+                await _campaignRepo.UpdateAsync(campaign);
+                Console.WriteLine("Campaign metrics updated successfully in database");
+            }
         }
     }
 }

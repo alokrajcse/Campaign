@@ -72,5 +72,19 @@ namespace campaignServer.Controllers
             
             return Ok("Lead deleted successfully");
         }
+
+        [HttpPost("update-metrics/{campaignName}")]
+        public async Task<IActionResult> UpdateCampaignMetrics(string campaignName)
+        {
+            try
+            {
+                await _service.UpdateCampaignMetricsManually(campaignName);
+                return Ok($"Metrics updated for campaign: {campaignName}");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error updating metrics: {ex.Message}");
+            }
+        }
     }
 }

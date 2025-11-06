@@ -15,5 +15,6 @@ namespace campaignServer.Services
         Task<byte[]> ExportLeadsAsync(string format, string? campaignId, string? segment);
         Task<MultiLeadSearchResponseDto> SearchMultipleLeadsAsync(MultiLeadSearchRequestDto request);
         Task<bool> DeleteLeadAsync(string leadId);
+        Task UpdateCampaignMetricsManually(string campaignName);
     }
 }

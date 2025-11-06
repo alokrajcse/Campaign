@@ -33,7 +33,10 @@ export class AddLeadComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern(/^\+?[1-9]\d{1,14}$/)]],
       campaignId: ['', Validators.required],
-      segment: ['']
+      segment: [''],
+      openRate: [0, [Validators.min(0), Validators.max(1)]],
+      clickRate: [0, [Validators.min(0), Validators.max(10)]],
+      conversions: [0, [Validators.min(0), Validators.max(1)]]
     });
   }
 
@@ -66,7 +69,10 @@ export class AddLeadComponent implements OnInit {
         phone: formData.phone,
         campaignId: formData.campaignId,
         segment: formData.segment || this.segmentService.assignSegment(formData),
-        status: 'Active'
+        status: 'Active',
+        openRate: formData.openRate,
+        clickRate: formData.clickRate,
+        conversions: formData.conversions
       };
 
       console.log('Sending lead data:', lead);

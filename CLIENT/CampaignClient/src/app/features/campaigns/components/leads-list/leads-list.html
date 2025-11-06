@@ -57,4 +57,73 @@
       <button (click)="changePage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
     </div>
   </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Edit Lead</h3>
+      <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name</label>
+            <input formControlName="name" type="text">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input formControlName="email" type="email">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone</label>
+            <input formControlName="phone" type="text">
+          </div>
+          <div class="form-group">
+            <label>Campaign</label>
+            <select formControlName="campaignId">
+              <option value="">Select Campaign</option>
+              <option *ngFor="let campaign of campaigns" [value]="campaign">{{campaign}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Segment</label>
+            <input formControlName="segment" type="text">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select formControlName="status">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email Opened</label>
+            <select formControlName="openRate">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Clicks</label>
+            <input formControlName="clickRate" type="number" min="0" max="10">
+          </div>
+          <div class="form-group">
+            <label>Conversions</label>
+            <select formControlName="conversions">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" [disabled]="editForm.invalid">Save</button>
+          <button type="button" (click)="closeEditModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

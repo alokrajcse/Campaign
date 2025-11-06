@@ -9,4 +9,7 @@ export interface Lead {
   status?: string;
   createdDate?: string;
   updatedDate?: string;
+  openRate?: number;
+  clickRate?: number;
+  conversions?: number;
 }

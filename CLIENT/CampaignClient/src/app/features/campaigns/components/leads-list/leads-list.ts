@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Lead } from '../../../../core/models';
 import { CampaignService } from '../../services/campaign.service';
 import { NavigationComponent } from '../../../../shared/components/navigation/navigation';
@@ -8,7 +8,7 @@ import { NavigationComponent } from '../../../../shared/components/navigation/na
 @Component({
   selector: 'app-leads-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavigationComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NavigationComponent],
   templateUrl: './leads-list.html',
   styleUrls: ['./leads-list.css']
 })
@@ -16,6 +16,7 @@ export class LeadsListComponent implements OnInit {
   leads: Lead[] = [];
   filteredLeads: Lead[] = [];
   paginatedLeads: Lead[] = [];
+  campaigns: string[] = [];
   loading = false;
   Math = Math;
 
@@ -28,11 +29,28 @@ export class LeadsListComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 10;
   totalItems = 0;
+  
+  showEditModal = false;
+  editingLead: Lead | null = null;
+  editForm: FormGroup;
 
-  constructor(private campaignService: CampaignService) {}
+  constructor(private campaignService: CampaignService, private fb: FormBuilder) {
+    this.editForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required]],
+      campaignId: ['', Validators.required],
+      segment: [''],
+      status: [''],
+      openRate: [0, [Validators.min(0), Validators.max(1)]],
+      clickRate: [0, [Validators.min(0), Validators.max(10)]],
+      conversions: [0, [Validators.min(0), Validators.max(1)]]
+    });
+  }
 
   ngOnInit() {
     this.loadLeads();
+    this.loadCampaigns();
   }
 
   loadLeads() {
@@ -95,24 +113,54 @@ export class LeadsListComponent implements OnInit {
 
 
   editLead(lead: Lead) {
-    const newName = prompt('Edit Lead Name:', lead.name);
-    const newEmail = prompt('Edit Lead Email:', lead.email);
-    const newPhone = prompt('Edit Lead Phone:', lead.phone);
-    
-    if (newName && newEmail && newPhone) {
-      const updatedLead = { ...lead, name: newName, email: newEmail, phone: newPhone };
-      this.campaignService.updateLead(lead.leadId, updatedLead).subscribe({
+    this.editingLead = lead;
+    this.editForm.patchValue({
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone,
+      campaignId: lead.campaignId,
+      segment: lead.segment,
+      status: lead.status,
+      openRate: lead.openRate || 0,
+      clickRate: lead.clickRate || 0,
+      conversions: lead.conversions || 0
+    });
+    this.showEditModal = true;
+  }
+
+  saveEdit() {
+    if (this.editForm.valid && this.editingLead) {
+      const formData = this.editForm.value;
+      const updatedLead = { ...this.editingLead, ...formData };
+      
+      this.campaignService.updateLead(this.editingLead.leadId, updatedLead).subscribe({
         next: () => {
-          lead.name = newName;
-          lead.email = newEmail;
-          lead.phone = newPhone;
-          console.log('Lead updated:', lead.leadId);
+          Object.assign(this.editingLead!, formData);
+          this.closeEditModal();
+          console.log('Lead updated:', this.editingLead!.leadId);
         },
         error: (err) => {
           console.error('Failed to update lead:', err);
         }
       });
     }
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editingLead = null;
+    this.editForm.reset();
+  }
+
+  loadCampaigns() {
+    this.campaignService.getCampaigns().subscribe({
+      next: (campaigns) => {
+        this.campaigns = campaigns.map(c => c.name);
+      },
+      error: (err) => {
+        console.error('Failed to load campaigns:', err);
+      }
+    });
   }
 
   deleteLead(lead: Lead) {

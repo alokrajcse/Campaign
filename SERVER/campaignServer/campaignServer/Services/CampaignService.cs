@@ -16,8 +16,22 @@ namespace campaignServer.Services
 
         public Task<IEnumerable<Campaign>> GetAllAsync() => _repo.GetAllAsync();
         public Task<Campaign?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
-        public Task AddAsync(Campaign c) => _repo.AddAsync(c);
-        public Task UpdateAsync(Campaign c) => _repo.UpdateAsync(c);
+        public async Task AddAsync(Campaign c)
+        {
+            // Generate engagement metrics when campaign is created
+            GenerateEngagementMetrics(c);
+            await _repo.AddAsync(c);
+        }
+        public async Task UpdateAsync(Campaign c)
+        {
+            // Recalculate engagement metrics if total leads changed
+            var existing = await _repo.GetByIdAsync(c.Id);
+            if (existing != null && existing.TotalLeads != c.TotalLeads)
+            {
+                GenerateEngagementMetrics(c);
+            }
+            await _repo.UpdateAsync(c);
+        }
         public Task DeleteAsync(int id) => _repo.DeleteAsync(id);
         public Task<IEnumerable<Campaign>> GetFilteredAsync(string? name, DateTime? startDate, DateTime? endDate, string? agency, string? buyer, string? brand, string? status) =>
             _repo.GetFilteredAsync(name, startDate, endDate, agency, buyer, brand, status);
@@ -65,14 +79,7 @@ namespace campaignServer.Services
                 CampaignDuration = (int)(campaign.EndDate - campaign.StartDate).TotalDays
             };
 
-            // Update campaign with calculated values
-            campaign.TotalLeads = totalLeads;
-            campaign.OpenRate = openRate;
-            campaign.ClickRate = clickRate;
-            campaign.ConversionRate = conversionRate;
-            campaign.Revenue = revenue;
-            
-            await _repo.UpdateAsync(campaign);
+            // Don't update campaign metrics here - only update when leads are added
 
             return new CampaignAnalyticsResponseDto
             {
@@ -80,6 +87,23 @@ namespace campaignServer.Services
                 Segments = segmentBreakdown,
                 Metrics = metrics
             };
+        }
+
+        private void GenerateEngagementMetrics(Campaign campaign)
+        {
+            var rand = new Random();
+            int totalLeads = campaign.TotalLeads > 0 ? campaign.TotalLeads : 100; // Default to 100 if not set
+            
+            // Generate realistic engagement stats
+            int opens = rand.Next((int)(totalLeads * 0.3), (int)(totalLeads * 0.8));  // 30–80% open rate
+            int clicks = rand.Next((int)(opens * 0.2), (int)(opens * 0.6));           // 20–60% of opens clicked
+            int conversions = rand.Next((int)(clicks * 0.1), (int)(clicks * 0.3));    // 10–30% of clicks converted
+            
+            // Calculate percentages
+            campaign.OpenRate = (int)((opens * 100.0) / totalLeads);
+            campaign.ClickRate = (int)((clicks * 100.0) / totalLeads);
+            campaign.ConversionRate = (int)((conversions * 100.0) / totalLeads);
+            campaign.Revenue = conversions * 150; // $150 average revenue per conversion
         }
     }
 }

@@ -12,6 +12,9 @@ namespace campaignServer.Models.DTOs
         public string CampaignId { get; set; } = string.Empty;
         public string? Segment { get; set; }
         public string? Status { get; set; } = "Active";
+        public int OpenRate { get; set; } = 0;
+        public int ClickRate { get; set; } = 0;
+        public int Conversions { get; set; } = 0;
     }
 
     public class LeadDto : LeadCreateDto
