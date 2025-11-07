@@ -262,13 +262,59 @@ export class CampaignDashboardComponent implements OnInit {
   }
 
   exportData() {
-    this.campaignService.exportLeads('csv').subscribe(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'leads-export.csv';
-      a.click();
-    });
+    this.exportCampaigns();
+  }
+
+  exportCampaigns() {
+    const csvContent = this.generateCampaignsCsv(this.filteredCampaigns);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'campaigns-export.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  generateCampaignsCsv(campaigns: Campaign[]): string {
+    const headers = [
+      'Campaign Name',
+      'Start Date',
+      'End Date',
+      'Status',
+      'Agency',
+      'Buyer',
+      'Brand',
+      'Total Leads',
+      'Open Rate (%)',
+      'Click Rate (%)',
+      'Conversion Rate (%)',
+      'Revenue ($)'
+    ];
+
+    const rows = campaigns.map(campaign => [
+      campaign.name || '',
+      campaign.startDate || '',
+      campaign.endDate || '',
+      campaign.status || '',
+      campaign.agency || '',
+      campaign.buyer || '',
+      campaign.brand || '',
+      campaign.totalLeads || 0,
+      campaign.openRate || 0,
+      campaign.clickRate || 0,
+      campaign.conversionRate || 0,
+      campaign.revenue || 0
+    ]);
+
+    const csvRows = [headers, ...rows];
+    return csvRows.map(row => 
+      row.map(field => 
+        typeof field === 'string' && field.includes(',') 
+          ? `"${field}"` 
+          : field
+      ).join(',')
+    ).join('\n');
   }
 
   openCreateModal() {

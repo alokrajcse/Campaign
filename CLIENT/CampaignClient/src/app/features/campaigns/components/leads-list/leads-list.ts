@@ -177,4 +177,56 @@ export class LeadsListComponent implements OnInit {
       });
     }
   }
+
+  exportLeads() {
+    const csvContent = this.generateLeadsCsv(this.filteredLeads);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'leads-export.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  generateLeadsCsv(leads: Lead[]): string {
+    const headers = [
+      'Lead ID',
+      'Name',
+      'Email',
+      'Phone',
+      'Campaign ID',
+      'Segment',
+      'Status',
+      'Open Rate',
+      'Click Rate',
+      'Conversions',
+      'Created Date',
+      'Updated Date'
+    ];
+
+    const rows = leads.map(lead => [
+      lead.leadId || '',
+      lead.name || '',
+      lead.email || '',
+      lead.phone || '',
+      lead.campaignId || '',
+      lead.segment || '',
+      lead.status || '',
+      lead.openRate || 0,
+      lead.clickRate || 0,
+      lead.conversions || 0,
+      lead.createdDate || '',
+      lead.updatedDate || ''
+    ]);
+
+    const csvRows = [headers, ...rows];
+    return csvRows.map(row => 
+      row.map(field => 
+        typeof field === 'string' && field.includes(',') 
+          ? `"${field}"` 
+          : field
+      ).join(',')
+    ).join('\n');
+  }
 }

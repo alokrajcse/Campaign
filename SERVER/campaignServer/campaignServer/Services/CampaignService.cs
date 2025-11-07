@@ -18,18 +18,16 @@ namespace campaignServer.Services
         public Task<Campaign?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
         public async Task AddAsync(Campaign c)
         {
-            // Generate engagement metrics when campaign is created
-            GenerateEngagementMetrics(c);
+            // Initialize metrics to zero when campaign is created
+            c.TotalLeads = 0;
+            c.OpenRate = 0;
+            c.ClickRate = 0;
+            c.ConversionRate = 0;
+            c.Revenue = 0;
             await _repo.AddAsync(c);
         }
         public async Task UpdateAsync(Campaign c)
         {
-            // Recalculate engagement metrics if total leads changed
-            var existing = await _repo.GetByIdAsync(c.Id);
-            if (existing != null && existing.TotalLeads != c.TotalLeads)
-            {
-                GenerateEngagementMetrics(c);
-            }
             await _repo.UpdateAsync(c);
         }
         public Task DeleteAsync(int id) => _repo.DeleteAsync(id);
@@ -89,21 +87,6 @@ namespace campaignServer.Services
             };
         }
 
-        private void GenerateEngagementMetrics(Campaign campaign)
-        {
-            var rand = new Random();
-            int totalLeads = campaign.TotalLeads > 0 ? campaign.TotalLeads : 100; // Default to 100 if not set
-            
-            // Generate realistic engagement stats
-            int opens = rand.Next((int)(totalLeads * 0.3), (int)(totalLeads * 0.8));  // 30–80% open rate
-            int clicks = rand.Next((int)(opens * 0.2), (int)(opens * 0.6));           // 20–60% of opens clicked
-            int conversions = rand.Next((int)(clicks * 0.1), (int)(clicks * 0.3));    // 10–30% of clicks converted
-            
-            // Calculate percentages
-            campaign.OpenRate = (int)((opens * 100.0) / totalLeads);
-            campaign.ClickRate = (int)((clicks * 100.0) / totalLeads);
-            campaign.ConversionRate = (int)((conversions * 100.0) / totalLeads);
-            campaign.Revenue = conversions * 150; // $150 average revenue per conversion
-        }
+
     }
 }

@@ -42,6 +42,14 @@
   cursor: pointer;
 }
 
+.export-btn {
+  background: #28a745 !important;
+}
+
+.export-btn:hover {
+  background: #218838 !important;
+}
+
 .leads-table {
   background: white;
   border-radius: 8px;
@@ -61,9 +69,9 @@ th, td {
 }
 
 th {
-  background: #f8f9fa;
+  background: #000000;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
 }
 
 .segment {
