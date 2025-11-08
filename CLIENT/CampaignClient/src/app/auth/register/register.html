@@ -37,6 +37,17 @@
         <div class="error" *ngIf="errors.password">{{errors.password}}</div>
       </div>
       
+      <div class="input-group">
+        <select 
+          [(ngModel)]="organizationId" 
+          name="organization"
+          required>
+          <option value="0">Select Organization</option>
+          <option *ngFor="let org of organizations" [value]="org.id">{{org.name}}</option>
+        </select>
+        <div class="error" *ngIf="errors.organization">{{errors.organization}}</div>
+      </div>
+      
       <button type="button" (click)="register()" class="signup-btn">Sign Up</button>
     </form>
     

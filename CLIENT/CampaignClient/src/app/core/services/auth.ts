@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { LoginRequest, LoginResponse, RegisterRequest } from '../models/auth';
+import { LoginRequest, LoginResponse, RegisterRequest, Organization } from '../models/auth';
 import { Observable, tap } from 'rxjs';
 
 @Injectable({
@@ -8,8 +8,13 @@ import { Observable, tap } from 'rxjs';
 })
 export class AuthService {
   private apiUrl='https://localhost:44392/api/Auth';
+  private orgApiUrl='https://localhost:44392/api/Organizations';
 
   constructor(private http: HttpClient){
+  }
+
+  getOrganizations(): Observable<Organization[]> {
+    return this.http.get<Organization[]>(this.orgApiUrl);
   }
 
   signup(request: RegisterRequest): Observable<boolean>{

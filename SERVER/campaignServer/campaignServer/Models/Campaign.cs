@@ -15,5 +15,6 @@
         public string? Agency { get; set; }
         public string? Buyer { get; set; }
         public string? Brand { get; set; }
+        public int OrganizationId { get; set; }
     }
 }

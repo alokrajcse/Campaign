@@ -31,13 +31,13 @@ namespace campaignServer.Services
             {
                 Username = request.Username,
                 Email = request.Email,
-                PasswordHash = passwordHash
+                PasswordHash = passwordHash,
+                OrganizationId = request.OrganizationId
             };
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
             return true;
-
         }
 
         public async Task<string?> LoginAsync(LoginRequest request)
@@ -59,7 +59,8 @@ namespace campaignServer.Services
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Name, user.Username)
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim("OrganizationId", user.OrganizationId.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
                 Issuer = _jwtSettings.Issuer,

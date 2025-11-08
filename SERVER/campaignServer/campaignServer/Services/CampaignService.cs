@@ -14,29 +14,32 @@ namespace campaignServer.Services
             _context = context;
         }
 
-        public async Task<List<Campaign>> GetAllAsync()
+        // Get campaigns for user's organization only
+        public async Task<List<Campaign>> GetByOrganizationAsync(int organizationId)
         {
-            return await _context.Campaigns.ToListAsync();
+            return await _context.Campaigns
+                .Where(c => c.OrganizationId == organizationId)
+                .ToListAsync();
         }
 
-        public async Task<Campaign?> GetByIdAsync(int id)
+        // Get single campaign (check organization ownership)
+        public async Task<Campaign?> GetByIdAsync(int id, int organizationId)
         {
-            return await _context.Campaigns.FindAsync(id);
+            return await _context.Campaigns
+                .FirstOrDefaultAsync(c => c.Id == id && c.OrganizationId == organizationId);
         }
 
-        public async Task<Campaign> AddAsync(Campaign campaign)
+        // Create new campaign for user's organization
+        public async Task<Campaign> AddAsync(Campaign campaign, int organizationId)
         {
-            campaign.TotalLeads = 0;
-            campaign.OpenRate = 0;
-            campaign.ClickRate = 0;
-            campaign.ConversionRate = 0;
-            campaign.Revenue = 0;
+            campaign.OrganizationId = organizationId;
             
             _context.Campaigns.Add(campaign);
             await _context.SaveChangesAsync();
             return campaign;
         }
 
+        // Update campaign
         public async Task<Campaign> UpdateAsync(Campaign campaign)
         {
             _context.Campaigns.Update(campaign);
@@ -44,6 +47,7 @@ namespace campaignServer.Services
             return campaign;
         }
 
+        // Delete campaign
         public async Task<bool> DeleteAsync(int id)
         {
             var campaign = await _context.Campaigns.FindAsync(id);
@@ -54,50 +58,33 @@ namespace campaignServer.Services
             return true;
         }
 
-        public async Task<List<Campaign>> GetFilteredAsync(string? name, DateTime? startDate, DateTime? endDate, string? agency, string? buyer, string? brand, string? status)
+        // Filter campaigns by organization and other criteria
+        public async Task<List<Campaign>> GetFilteredAsync(int organizationId, string? name)
         {
-            var query = _context.Campaigns.AsQueryable();
-            
-            if (!string.IsNullOrEmpty(name))
-                query = query.Where(c => c.Name.Contains(name));
-            if (startDate.HasValue)
-                query = query.Where(c => c.StartDate >= startDate.Value);
-            if (endDate.HasValue)
-                query = query.Where(c => c.EndDate <= endDate.Value);
-            if (!string.IsNullOrEmpty(agency))
-                query = query.Where(c => c.Agency == agency);
-            if (!string.IsNullOrEmpty(buyer))
-                query = query.Where(c => c.Buyer == buyer);
-            if (!string.IsNullOrEmpty(brand))
-                query = query.Where(c => c.Brand == brand);
-            if (!string.IsNullOrEmpty(status))
-                query = query.Where(c => c.Status == status);
-                
-            return await query.ToListAsync();
-        }
-
-        public async Task<CampaignAnalyticsResponseDto?> GetCampaignAnalyticsAsync(int campaignId)
-        {
-            var campaign = await GetByIdAsync(campaignId);
-            if (campaign == null) return null;
-
-            // Get leads for this campaign
-            var leads = await _context.Leads
-                .Where(l => l.CampaignId == campaign.Name)
+            var campaigns = await _context.Campaigns
+                .Where(c => c.OrganizationId == organizationId)
                 .ToListAsync();
             
-            // Simple segment breakdown
-            var segmentBreakdown = leads
-                .GroupBy(l => l.Segment ?? "General")
-                .Select(g => new SegmentBreakdownDto
-                {
-                    Name = g.Key,
-                    Count = g.Count(),
-                    Percentage = leads.Count > 0 ? (g.Count() * 100) / leads.Count : 0
-                })
-                .ToList();
+            if (!string.IsNullOrEmpty(name))
+            {
+                campaigns = campaigns.Where(c => c.Name.Contains(name)).ToList();
+            }
+                
+            return campaigns;
+        }
 
-            // Simple metrics calculation
+        // Get campaign analytics
+        public async Task<CampaignAnalyticsResponseDto?> GetCampaignAnalyticsAsync(int campaignId, int organizationId)
+        {
+            var campaign = await GetByIdAsync(campaignId, organizationId);
+            if (campaign == null) return null;
+
+            // Get leads for this campaign from same organization
+            var leads = await _context.Leads
+                .Where(l => l.CampaignId == campaign.Name && l.OrganizationId == organizationId)
+                .ToListAsync();
+            
+            // Simple calculations
             var totalLeads = leads.Count;
             var openedEmails = leads.Count(l => l.OpenRate > 0);
             var clickedLeads = leads.Count(l => l.ClickRate > 0);
@@ -109,14 +96,12 @@ namespace campaignServer.Services
                 OpenRate = totalLeads > 0 ? (openedEmails * 100) / totalLeads : 0,
                 ClickRate = totalLeads > 0 ? (clickedLeads * 100) / totalLeads : 0,
                 ConversionRate = totalLeads > 0 ? (convertedLeads * 100) / totalLeads : 0,
-                Revenue = convertedLeads * 150,
-                CampaignDuration = (int)(campaign.EndDate - campaign.StartDate).TotalDays
+                Revenue = convertedLeads * 150
             };
 
             return new CampaignAnalyticsResponseDto
             {
                 Campaign = campaign,
-                Segments = segmentBreakdown,
                 Metrics = metrics
             };
         }

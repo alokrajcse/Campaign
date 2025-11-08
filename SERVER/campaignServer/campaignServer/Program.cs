@@ -53,6 +53,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Register simplified services
 builder.Services.AddScoped<ICampaignService, CampaignService>();
 builder.Services.AddScoped<ILeadService, LeadService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 
 
 // Register User + JWT services

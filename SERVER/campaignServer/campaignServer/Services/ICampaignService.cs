@@ -5,12 +5,12 @@ namespace campaignServer.Services
 {
     public interface ICampaignService
     {
-        Task<List<Campaign>> GetAllAsync();
-        Task<Campaign?> GetByIdAsync(int id);
-        Task<Campaign> AddAsync(Campaign campaign);
+        Task<List<Campaign>> GetByOrganizationAsync(int organizationId);
+        Task<Campaign?> GetByIdAsync(int id, int organizationId);
+        Task<Campaign> AddAsync(Campaign campaign, int organizationId);
         Task<Campaign> UpdateAsync(Campaign campaign);
         Task<bool> DeleteAsync(int id);
-        Task<List<Campaign>> GetFilteredAsync(string? name, DateTime? startDate, DateTime? endDate, string? agency, string? buyer, string? brand, string? status);
-        Task<CampaignAnalyticsResponseDto?> GetCampaignAnalyticsAsync(int campaignId);
+        Task<List<Campaign>> GetFilteredAsync(int organizationId, string? name);
+        Task<CampaignAnalyticsResponseDto?> GetCampaignAnalyticsAsync(int campaignId, int organizationId);
     }
 }

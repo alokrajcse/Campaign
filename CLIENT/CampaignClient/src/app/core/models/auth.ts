@@ -3,6 +3,7 @@ export interface User {
   username: string;
   email: string;
   token?: string;
+  organizationId?: number;
 }
 
 export interface LoginRequest {
@@ -19,4 +20,10 @@ export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
+  organizationId: number;
+}
+
+export interface Organization {
+  id: number;
+  name: string;
 }

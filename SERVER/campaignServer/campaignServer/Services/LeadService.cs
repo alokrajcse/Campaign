@@ -13,27 +13,33 @@ namespace campaignServer.Services
             _context = context;
         }
 
-        public async Task<List<Lead>> GetAllAsync()
+        // Get all leads for user's organization
+        public async Task<List<Lead>> GetByOrganizationAsync(int organizationId)
         {
-            return await _context.Leads.ToListAsync();
+            return await _context.Leads
+                .Where(l => l.OrganizationId == organizationId)
+                .ToListAsync();
         }
 
-        public async Task<Lead?> GetByIdAsync(string leadId)
+        // Get single lead (check organization ownership)
+        public async Task<Lead?> GetByIdAsync(string leadId, int organizationId)
         {
-            return await _context.Leads.FirstOrDefaultAsync(l => l.LeadId == leadId);
+            return await _context.Leads
+                .FirstOrDefaultAsync(l => l.LeadId == leadId && l.OrganizationId == organizationId);
         }
 
-        public async Task<Lead> AddAsync(Lead lead)
+        // Create new lead for user's organization
+        public async Task<Lead> AddAsync(Lead lead, int organizationId)
         {
-            // Set default values
             lead.CreatedDate = DateTime.UtcNow;
-            lead.UpdatedDate = DateTime.UtcNow;
+            lead.OrganizationId = organizationId;
             
             _context.Leads.Add(lead);
             await _context.SaveChangesAsync();
             return lead;
         }
 
+        // Update lead
         public async Task<Lead> UpdateAsync(Lead lead)
         {
             lead.UpdatedDate = DateTime.UtcNow;
@@ -42,9 +48,10 @@ namespace campaignServer.Services
             return lead;
         }
 
-        public async Task<bool> DeleteAsync(string leadId)
+        // Delete lead (check organization ownership)
+        public async Task<bool> DeleteAsync(string leadId, int organizationId)
         {
-            var lead = await GetByIdAsync(leadId);
+            var lead = await GetByIdAsync(leadId, organizationId);
             if (lead == null) return false;
             
             _context.Leads.Remove(lead);
@@ -52,26 +59,28 @@ namespace campaignServer.Services
             return true;
         }
 
-        public async Task<List<Lead>> GetByFilterAsync(string? campaignId, string? segment, string? email)
+        // Filter leads by organization and campaign
+        public async Task<List<Lead>> GetByFilterAsync(int organizationId, string? campaignId)
         {
-            var query = _context.Leads.AsQueryable();
+            var leads = await _context.Leads
+                .Where(l => l.OrganizationId == organizationId)
+                .ToListAsync();
             
             if (!string.IsNullOrEmpty(campaignId))
-                query = query.Where(l => l.CampaignId == campaignId);
-            if (!string.IsNullOrEmpty(segment))
-                query = query.Where(l => l.Segment == segment);
-            if (!string.IsNullOrEmpty(email))
-                query = query.Where(l => l.Email.Contains(email));
+            {
+                leads = leads.Where(l => l.CampaignId == campaignId).ToList();
+            }
                 
-            return await query.ToListAsync();
+            return leads;
         }
 
-        public async Task<List<Lead>> AddBulkAsync(List<Lead> leads)
+        // Add multiple leads for user's organization
+        public async Task<List<Lead>> AddBulkAsync(List<Lead> leads, int organizationId)
         {
             foreach (var lead in leads)
             {
                 lead.CreatedDate = DateTime.UtcNow;
-                lead.UpdatedDate = DateTime.UtcNow;
+                lead.OrganizationId = organizationId;
             }
             
             _context.Leads.AddRange(leads);

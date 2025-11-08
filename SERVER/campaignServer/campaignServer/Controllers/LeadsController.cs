@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using campaignServer.Models;
 using campaignServer.Services;
 
@@ -6,7 +7,8 @@ namespace campaignServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class LeadsController : ControllerBase
+    [Authorize]
+    public class LeadsController : BaseController
     {
         private readonly ILeadService _service;
         
@@ -18,36 +20,41 @@ namespace campaignServer.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var leads = await _service.GetAllAsync();
+            var organizationId = GetUserOrganizationId();
+            var leads = await _service.GetByOrganizationAsync(organizationId);
             return Ok(leads);
         }
 
         [HttpGet("{leadId}")]
         public async Task<IActionResult> GetById(string leadId)
         {
-            var lead = await _service.GetByIdAsync(leadId);
+            var organizationId = GetUserOrganizationId();
+            var lead = await _service.GetByIdAsync(leadId, organizationId);
             if (lead == null) return NotFound();
             return Ok(lead);
         }
 
         [HttpGet("filter")]
-        public async Task<IActionResult> GetByFilter([FromQuery] string? campaignId, [FromQuery] string? segment, [FromQuery] string? email)
+        public async Task<IActionResult> GetByFilter([FromQuery] string? campaignId)
         {
-            var leads = await _service.GetByFilterAsync(campaignId, segment, email);
+            var organizationId = GetUserOrganizationId();
+            var leads = await _service.GetByFilterAsync(organizationId, campaignId);
             return Ok(leads);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Lead lead)
         {
-            var created = await _service.AddAsync(lead);
+            var organizationId = GetUserOrganizationId();
+            var created = await _service.AddAsync(lead, organizationId);
             return CreatedAtAction(nameof(GetById), new { leadId = created.LeadId }, created);
         }
 
         [HttpPost("bulk")]
         public async Task<IActionResult> CreateBulk([FromBody] List<Lead> leads)
         {
-            var created = await _service.AddBulkAsync(leads);
+            var organizationId = GetUserOrganizationId();
+            var created = await _service.AddBulkAsync(leads, organizationId);
             return Ok(new { message = $"Added {created.Count} leads successfully", leads = created });
         }
 
@@ -62,7 +69,8 @@ namespace campaignServer.Controllers
         [HttpDelete("{leadId}")]
         public async Task<IActionResult> Delete(string leadId)
         {
-            var deleted = await _service.DeleteAsync(leadId);
+            var organizationId = GetUserOrganizationId();
+            var deleted = await _service.DeleteAsync(leadId, organizationId);
             if (!deleted) return NotFound();
             return Ok("Lead deleted successfully");
         }

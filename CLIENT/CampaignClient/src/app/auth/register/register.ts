@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
+import { Organization } from '../../core/models/auth';
 
 @Component({
   selector: 'app-register',
@@ -10,14 +11,27 @@ import { AuthService } from '../../core/services/auth';
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
-export class Register {
+export class Register implements OnInit {
 
   username = '';
   email = '';
   password = '';
+  organizationId = 0;
+  organizations: Organization[] = [];
   errors: any = {};
 
   constructor(private auth: AuthService) {}
+
+  ngOnInit() {
+    this.loadOrganizations();
+  }
+
+  loadOrganizations() {
+    this.auth.getOrganizations().subscribe({
+      next: (orgs) => this.organizations = orgs,
+      error: (e) => console.error('Error loading organizations:', e)
+    });
+  }
 
   validateForm(): boolean {
     this.errors = {};
@@ -38,6 +52,10 @@ export class Register {
       this.errors.password = 'Password must be at least 6 characters';
     }
     
+    if (!this.organizationId || this.organizationId === 0) {
+      this.errors.organization = 'Please select an organization';
+    }
+    
     return Object.keys(this.errors).length === 0;
   }
 
@@ -46,7 +64,7 @@ export class Register {
       return;
     }
     
-    this.auth.signup({username: this.username, email: this.email, password: this.password})
+    this.auth.signup({username: this.username, email: this.email, password: this.password, organizationId: this.organizationId})
     .subscribe({
       next: () => alert('Registration successful'),
       error: (e: any) => alert("Error: " + e.message)

@@ -1,12 +1,14 @@
 ﻿using campaignServer.Models;
 using campaignServer.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace campaignServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CampaignsController : ControllerBase
+    [Authorize]
+    public class CampaignsController : BaseController
     {
         private readonly ICampaignService _service;
 
@@ -16,17 +18,18 @@ namespace campaignServer.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? name, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate,
-                                                [FromQuery] string? agency, [FromQuery] string? buyer, [FromQuery] string? brand, [FromQuery] string? status)
+        public async Task<IActionResult> GetAll([FromQuery] string? name)
         {
-            var campaigns = await _service.GetFilteredAsync(name, startDate, endDate, agency, buyer, brand, status);
+            var organizationId = GetUserOrganizationId();
+            var campaigns = await _service.GetFilteredAsync(organizationId, name);
             return Ok(campaigns);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var campaign = await _service.GetByIdAsync(id);
+            var organizationId = GetUserOrganizationId();
+            var campaign = await _service.GetByIdAsync(id, organizationId);
             if (campaign == null) return NotFound();
             return Ok(campaign);
         }
@@ -34,7 +37,8 @@ namespace campaignServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Campaign campaign)
         {
-            var created = await _service.AddAsync(campaign);
+            var organizationId = GetUserOrganizationId();
+            var created = await _service.AddAsync(campaign, organizationId);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
@@ -57,7 +61,8 @@ namespace campaignServer.Controllers
         [HttpGet("{id}/analytics")]
         public async Task<IActionResult> GetAnalytics(int id)
         {
-            var analytics = await _service.GetCampaignAnalyticsAsync(id);
+            var organizationId = GetUserOrganizationId();
+            var analytics = await _service.GetCampaignAnalyticsAsync(id, organizationId);
             if (analytics == null) return NotFound();
             return Ok(analytics);
         }
