@@ -72,5 +72,36 @@ namespace campaignServer.Services
             return tokenHandler.WriteToken(token);
         }
 
+        // Get user profile with organization name
+        public async Task<UserProfile?> GetProfileAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return null;
+
+            var organization = await _context.Organizations.FindAsync(user.OrganizationId);
+            
+            return new UserProfile
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                OrganizationId = user.OrganizationId,
+                OrganizationName = organization?.Name ?? "Unknown"
+            };
         }
+
+        // Update user profile
+        public async Task<UserProfile?> UpdateProfileAsync(int userId, UpdateProfileRequest request)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return null;
+
+            user.Username = request.Username;
+            user.Email = request.Email;
+            user.OrganizationId = request.OrganizationId;
+
+            await _context.SaveChangesAsync();
+            return await GetProfileAsync(userId);
+        }
+    }
 }

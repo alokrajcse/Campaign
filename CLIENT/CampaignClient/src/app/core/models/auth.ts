@@ -27,3 +27,17 @@ export interface Organization {
   id: number;
   name: string;
 }
+
+export interface UserProfile {
+  id: number;
+  username: string;
+  email: string;
+  organizationId: number;
+  organizationName: string;
+}
+
+export interface UpdateProfileRequest {
+  username: string;
+  email: string;
+  organizationId: number;
+}

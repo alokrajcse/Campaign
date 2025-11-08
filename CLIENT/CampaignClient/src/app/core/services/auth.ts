@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { LoginRequest, LoginResponse, RegisterRequest, Organization } from '../models/auth';
+import { LoginRequest, LoginResponse, RegisterRequest, Organization, UserProfile, UpdateProfileRequest } from '../models/auth';
 import { Observable, tap } from 'rxjs';
 
 @Injectable({
@@ -19,6 +19,14 @@ export class AuthService {
 
   signup(request: RegisterRequest): Observable<boolean>{
     return this.http.post<boolean>(`${this.apiUrl}/signup`, request);
+  }
+
+  getProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.apiUrl}/profile`);
+  }
+
+  updateProfile(request: UpdateProfileRequest): Observable<UserProfile> {
+    return this.http.put<UserProfile>(`${this.apiUrl}/profile`, request);
   }
 
   login(request: LoginRequest):Observable<LoginResponse> {

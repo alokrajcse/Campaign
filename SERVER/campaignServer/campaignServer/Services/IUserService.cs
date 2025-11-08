@@ -6,5 +6,7 @@ namespace campaignServer.Services
     {
         Task<bool> RegisterAsync(RegisterRequest request);
         Task<string?> LoginAsync(LoginRequest request);
+        Task<UserProfile?> GetProfileAsync(int userId);
+        Task<UserProfile?> UpdateProfileAsync(int userId, UpdateProfileRequest request);
     }
 }

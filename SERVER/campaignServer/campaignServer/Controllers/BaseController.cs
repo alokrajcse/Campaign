@@ -10,5 +10,12 @@ namespace campaignServer.Controllers
             var orgId = User.FindFirst("OrganizationId")?.Value;
             return int.Parse(orgId ?? "0");
         }
+
+        // Get user's ID from JWT token
+        protected int GetUserId()
+        {
+            var userId = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+            return int.Parse(userId ?? "0");
+        }
     }
 }

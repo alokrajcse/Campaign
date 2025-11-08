@@ -7,8 +7,7 @@ namespace campaignServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
-    public class AuthController : ControllerBase
+    public class AuthController : BaseController
     {
         private readonly IUserService _userService;
 
@@ -42,12 +41,24 @@ namespace campaignServer.Controllers
             return Ok(new { Token = token });
         }
 
+        [HttpGet("profile")]
+        [Authorize]
+        public async Task<IActionResult> GetProfile()
+        {
+            var userId = GetUserId();
+            var profile = await _userService.GetProfileAsync(userId);
+            if (profile == null) return NotFound();
+            return Ok(profile);
+        }
 
-
-
-        
-
-
-        
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+        {
+            var userId = GetUserId();
+            var profile = await _userService.UpdateProfileAsync(userId, request);
+            if (profile == null) return NotFound();
+            return Ok(profile);
+        }
     }
 }

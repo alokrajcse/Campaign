@@ -8,6 +8,7 @@ import { BulkUploadComponent } from './features/campaigns/components/bulk-upload
 import { MultiLeadSearchComponent } from './features/campaigns/components/multi-lead-search/multi-lead-search';
 import { LeadsListComponent } from './features/campaigns/components/leads-list/leads-list';
 import { OverviewComponent } from './features/campaigns/components/overview/overview';
+import { Profile } from './features/profile/profile';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -19,5 +20,6 @@ export const routes: Routes = [
   { path: 'campaigns/bulk-upload', component: BulkUploadComponent, canActivate: [loginGuard] },
   { path: 'campaigns/search', component: MultiLeadSearchComponent, canActivate: [loginGuard] },
   { path: 'campaigns/leads', component: LeadsListComponent, canActivate: [loginGuard] },
+  { path: 'profile', component: Profile, canActivate: [loginGuard] },
   { path: 'dashboard', redirectTo: 'campaigns', pathMatch: 'full' }
 ];
