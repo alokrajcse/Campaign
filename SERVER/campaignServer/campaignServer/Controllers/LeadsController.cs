@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using campaignServer.Models.DTOs;
+using campaignServer.Models;
 using campaignServer.Services;
-using System.Threading.Tasks;
 
 namespace campaignServer.Controllers
 {
@@ -10,81 +9,62 @@ namespace campaignServer.Controllers
     public class LeadsController : ControllerBase
     {
         private readonly ILeadService _service;
-        public LeadsController(ILeadService service) => _service = service;
-
-        [HttpPost]
-        public async Task<IActionResult> AddLead([FromBody] LeadCreateDto dto)
+        
+        public LeadsController(ILeadService service)
         {
-            var result = await _service.AddLeadAsync(dto);
-            return Ok(result);
+            _service = service;
         }
 
-        [HttpPost("bulk")]
-        public async Task<IActionResult> AddBulk([FromBody] BulkLeadRequestDto req)
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _service.AddBulkAsync(req);
-            return Ok(result);
+            var leads = await _service.GetAllAsync();
+            return Ok(leads);
         }
 
         [HttpGet("{leadId}")]
-        public async Task<IActionResult> GetLead(string leadId)
+        public async Task<IActionResult> GetById(string leadId)
         {
-            var lead = await _service.GetLeadByIdAsync(leadId);
+            var lead = await _service.GetByIdAsync(leadId);
             if (lead == null) return NotFound();
             return Ok(lead);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetLeads([FromQuery] string? campaignId, [FromQuery] string? segment, [FromQuery] string? email)
+        [HttpGet("filter")]
+        public async Task<IActionResult> GetByFilter([FromQuery] string? campaignId, [FromQuery] string? segment, [FromQuery] string? email)
         {
-            var leads = await _service.GetLeadsAsync(campaignId, segment, email);
+            var leads = await _service.GetByFilterAsync(campaignId, segment, email);
             return Ok(leads);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] Lead lead)
+        {
+            var created = await _service.AddAsync(lead);
+            return CreatedAtAction(nameof(GetById), new { leadId = created.LeadId }, created);
+        }
+
+        [HttpPost("bulk")]
+        public async Task<IActionResult> CreateBulk([FromBody] List<Lead> leads)
+        {
+            var created = await _service.AddBulkAsync(leads);
+            return Ok(new { message = $"Added {created.Count} leads successfully", leads = created });
+        }
+
         [HttpPut("{leadId}")]
-        public async Task<IActionResult> UpdateLead(string leadId, [FromBody] LeadCreateDto dto)
+        public async Task<IActionResult> Update(string leadId, [FromBody] Lead lead)
         {
-            var result = await _service.UpdateLeadAsync(leadId, dto);
-            return Ok(result);
-        }
-
-        [HttpGet("export")]
-        public async Task<IActionResult> ExportLeads([FromQuery] string format = "csv", [FromQuery] string? campaignId = null, [FromQuery] string? segment = null)
-        {
-            var bytes = await _service.ExportLeadsAsync(format, campaignId, segment);
-            return File(bytes, "text/csv", "leads.csv");
-        }
-
-
-        [HttpPost("multi-search")]
-        public async Task<ActionResult<MultiLeadSearchResponseDto>> MultiSearch([FromBody] MultiLeadSearchRequestDto request)
-        {
-            var result = await _service.SearchMultipleLeadsAsync(request);
-            return Ok(result);
+            if (leadId != lead.LeadId) return BadRequest("ID mismatch");
+            var updated = await _service.UpdateAsync(lead);
+            return Ok(updated);
         }
 
         [HttpDelete("{leadId}")]
-        public async Task<IActionResult> DeleteLead(string leadId)
+        public async Task<IActionResult> Delete(string leadId)
         {
-            var result = await _service.DeleteLeadAsync(leadId);
-            if (!result)
-                return NotFound("Lead not found");
-            
+            var deleted = await _service.DeleteAsync(leadId);
+            if (!deleted) return NotFound();
             return Ok("Lead deleted successfully");
-        }
-
-        [HttpPost("update-metrics/{campaignName}")]
-        public async Task<IActionResult> UpdateCampaignMetrics(string campaignName)
-        {
-            try
-            {
-                await _service.UpdateCampaignMetricsManually(campaignName);
-                return Ok($"Metrics updated for campaign: {campaignName}");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"Error updating metrics: {ex.Message}");
-            }
         }
     }
 }

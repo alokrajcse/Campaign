@@ -1,83 +1,117 @@
-﻿using campaignServer.Models;
+﻿using campaignServer.Data;
+using campaignServer.Models;
 using campaignServer.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace campaignServer.Services
 {
-    public class CampaignService
+    public class CampaignService : ICampaignService
     {
-        private readonly ICampaignRepository _repo;
-        private readonly ILeadService _leadService;
+        private readonly AppDbContext _context;
         
-        public CampaignService(ICampaignRepository repo, ILeadService leadService)
+        public CampaignService(AppDbContext context)
         {
-            _repo = repo;
-            _leadService = leadService;
+            _context = context;
         }
 
-        public Task<IEnumerable<Campaign>> GetAllAsync() => _repo.GetAllAsync();
-        public Task<Campaign?> GetByIdAsync(int id) => _repo.GetByIdAsync(id);
-        public async Task AddAsync(Campaign c)
+        public async Task<List<Campaign>> GetAllAsync()
         {
-            // Initialize metrics to zero when campaign is created
-            c.TotalLeads = 0;
-            c.OpenRate = 0;
-            c.ClickRate = 0;
-            c.ConversionRate = 0;
-            c.Revenue = 0;
-            await _repo.AddAsync(c);
+            return await _context.Campaigns.ToListAsync();
         }
-        public async Task UpdateAsync(Campaign c)
+
+        public async Task<Campaign?> GetByIdAsync(int id)
         {
-            await _repo.UpdateAsync(c);
+            return await _context.Campaigns.FindAsync(id);
         }
-        public Task DeleteAsync(int id) => _repo.DeleteAsync(id);
-        public Task<IEnumerable<Campaign>> GetFilteredAsync(string? name, DateTime? startDate, DateTime? endDate, string? agency, string? buyer, string? brand, string? status) =>
-            _repo.GetFilteredAsync(name, startDate, endDate, agency, buyer, brand, status);
+
+        public async Task<Campaign> AddAsync(Campaign campaign)
+        {
+            campaign.TotalLeads = 0;
+            campaign.OpenRate = 0;
+            campaign.ClickRate = 0;
+            campaign.ConversionRate = 0;
+            campaign.Revenue = 0;
+            
+            _context.Campaigns.Add(campaign);
+            await _context.SaveChangesAsync();
+            return campaign;
+        }
+
+        public async Task<Campaign> UpdateAsync(Campaign campaign)
+        {
+            _context.Campaigns.Update(campaign);
+            await _context.SaveChangesAsync();
+            return campaign;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var campaign = await _context.Campaigns.FindAsync(id);
+            if (campaign == null) return false;
+            
+            _context.Campaigns.Remove(campaign);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<List<Campaign>> GetFilteredAsync(string? name, DateTime? startDate, DateTime? endDate, string? agency, string? buyer, string? brand, string? status)
+        {
+            var query = _context.Campaigns.AsQueryable();
+            
+            if (!string.IsNullOrEmpty(name))
+                query = query.Where(c => c.Name.Contains(name));
+            if (startDate.HasValue)
+                query = query.Where(c => c.StartDate >= startDate.Value);
+            if (endDate.HasValue)
+                query = query.Where(c => c.EndDate <= endDate.Value);
+            if (!string.IsNullOrEmpty(agency))
+                query = query.Where(c => c.Agency == agency);
+            if (!string.IsNullOrEmpty(buyer))
+                query = query.Where(c => c.Buyer == buyer);
+            if (!string.IsNullOrEmpty(brand))
+                query = query.Where(c => c.Brand == brand);
+            if (!string.IsNullOrEmpty(status))
+                query = query.Where(c => c.Status == status);
+                
+            return await query.ToListAsync();
+        }
 
         public async Task<CampaignAnalyticsResponseDto?> GetCampaignAnalyticsAsync(int campaignId)
         {
-            var campaign = await _repo.GetByIdAsync(campaignId);
+            var campaign = await GetByIdAsync(campaignId);
             if (campaign == null) return null;
 
-            // Get leads for this campaign - need to get actual Lead entities with engagement data
-            var leadDtos = await _leadService.GetLeadsAsync(campaign.Name, null, null);
+            // Get leads for this campaign
+            var leads = await _context.Leads
+                .Where(l => l.CampaignId == campaign.Name)
+                .ToListAsync();
             
-            // Calculate segment breakdown
-            var segmentBreakdown = leadDtos
+            // Simple segment breakdown
+            var segmentBreakdown = leads
                 .GroupBy(l => l.Segment ?? "General")
                 .Select(g => new SegmentBreakdownDto
                 {
                     Name = g.Key,
                     Count = g.Count(),
-                    Percentage = leadDtos.Count > 0 ? (int)Math.Round((double)g.Count() / leadDtos.Count * 100) : 0
+                    Percentage = leads.Count > 0 ? (g.Count() * 100) / leads.Count : 0
                 })
                 .ToList();
 
-            // Calculate engagement metrics from actual lead data
-            var totalLeads = leadDtos.Count;
-            var openedEmails = leadDtos.Count(l => l.OpenRate > 0); // Assuming OpenRate > 0 means opened
-            var clickedLeads = leadDtos.Count(l => l.ClickRate > 0); // Assuming ClickRate > 0 means clicked
-            var convertedLeads = leadDtos.Count(l => l.Conversions > 0); // Assuming Conversions > 0 means converted
-
-            // Calculate percentages
-            var openRate = totalLeads > 0 ? (int)Math.Round((double)openedEmails / totalLeads * 100) : 0;
-            var clickRate = totalLeads > 0 ? (int)Math.Round((double)clickedLeads / totalLeads * 100) : 0;
-            var conversionRate = totalLeads > 0 ? (int)Math.Round((double)convertedLeads / totalLeads * 100) : 0;
-            
-            // Calculate revenue based on conversions
-            var revenue = convertedLeads * 150; // Average revenue per conversion
+            // Simple metrics calculation
+            var totalLeads = leads.Count;
+            var openedEmails = leads.Count(l => l.OpenRate > 0);
+            var clickedLeads = leads.Count(l => l.ClickRate > 0);
+            var convertedLeads = leads.Count(l => l.Conversions > 0);
 
             var metrics = new AnalyticsMetricsDto
             {
                 TotalLeads = totalLeads,
-                OpenRate = openRate,
-                ClickRate = clickRate,
-                ConversionRate = conversionRate,
-                Revenue = revenue,
+                OpenRate = totalLeads > 0 ? (openedEmails * 100) / totalLeads : 0,
+                ClickRate = totalLeads > 0 ? (clickedLeads * 100) / totalLeads : 0,
+                ConversionRate = totalLeads > 0 ? (convertedLeads * 100) / totalLeads : 0,
+                Revenue = convertedLeads * 150,
                 CampaignDuration = (int)(campaign.EndDate - campaign.StartDate).TotalDays
             };
-
-            // Don't update campaign metrics here - only update when leads are added
 
             return new CampaignAnalyticsResponseDto
             {
@@ -86,7 +120,5 @@ namespace campaignServer.Services
                 Metrics = metrics
             };
         }
-
-
     }
 }

@@ -50,16 +50,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-// Register Campaign services
-builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
-builder.Services.AddScoped<CampaignService>();
-
-//// ? Register Lead services (add this)/
-//builder.Services.AddScoped<ILeadRepository, LeadRepository>();
-//builder.Services.AddScoped<LeadService>();
-
-// ? Register Lead services
-builder.Services.AddScoped<ILeadRepository, LeadRepository>();
+// Register simplified services
+builder.Services.AddScoped<ICampaignService, CampaignService>();
 builder.Services.AddScoped<ILeadService, LeadService>();
 
 
