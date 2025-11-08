@@ -11,7 +11,7 @@ import { AuthService } from '../../../core/services/auth';
   styleUrls: ['./navigation.css']
 })
 export class NavigationComponent implements OnInit, OnDestroy {
-  remainingTime = 1800; // 30 minutes in seconds
+  remainingTime = 18; // 30 minutes in seconds
   private timer: any;
   isMobileMenuOpen = false;
 

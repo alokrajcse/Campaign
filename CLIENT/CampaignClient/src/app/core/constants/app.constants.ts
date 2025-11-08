@@ -1,7 +1,7 @@
 export const APP_CONSTANTS = {
   API_BASE_URL: 'https://localhost:44392/api',
   APP_NAME: 'Campaign X',
-  SESSION_TIMEOUT: 1800, // 30 minutes in seconds
+  SESSION_TIMEOUT: 18, // 30 minutes in seconds
   PAGINATION: {
     DEFAULT_PAGE_SIZE: 10,
     LEADS_PAGE_SIZE: 10,

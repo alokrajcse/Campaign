@@ -85,6 +85,10 @@
   color: white;
 }
 
+.logout-btn .nav-text {
+  font-weight: 900 !important;
+}
+
 .session-timer {
   display: flex;
   align-items: center;

@@ -34,14 +34,20 @@ export class CampaignDashboardComponent implements OnInit {
     name: '',
     startDate: '',
     endDate: '',
-    agency: '',
-    buyer: '',
-    brand: ''
+    agencies: [] as string[],
+    buyers: [] as string[],
+    brands: [] as string[]
   };
 
   agencies: string[] = [];
   buyers: string[] = [];
   brands: string[] = [];
+  
+  dropdownStates = {
+    agencies: false,
+    buyers: false,
+    brands: false
+  };
   
   // Pagination
   currentPage = 1;
@@ -117,9 +123,9 @@ export class CampaignDashboardComponent implements OnInit {
       return (!this.filters.name || campaign.name.toLowerCase().includes(this.filters.name.toLowerCase())) &&
              (!this.filters.startDate || campaign.startDate >= this.filters.startDate) &&
              (!this.filters.endDate || campaign.endDate <= this.filters.endDate) &&
-             (!this.filters.agency || campaign.agency === this.filters.agency) &&
-             (!this.filters.buyer || campaign.buyer === this.filters.buyer) &&
-             (!this.filters.brand || campaign.brand === this.filters.brand);
+             (!this.filters.agencies.length || this.filters.agencies.includes(campaign.agency || '')) &&
+             (!this.filters.buyers.length || this.filters.buyers.includes(campaign.buyer || '')) &&
+             (!this.filters.brands.length || this.filters.brands.includes(campaign.brand || ''));
     });
     this.currentPage = 1;
     this.updatePagination();
@@ -165,10 +171,11 @@ export class CampaignDashboardComponent implements OnInit {
     this.currentPage = 1;
     this.updatePagination();
   }
-
+  
+ 
   getSortIcon(field: string): string {
     if (this.sortField !== field) return '(click to sort)';
-    return this.sortDirection === 'asc' ? '↑' : '↓';
+    return this.sortDirection === 'asc' ? '(asc)' : '(desc)';
   }
 
   getTotalLeads(): number {
@@ -230,23 +237,46 @@ export class CampaignDashboardComponent implements OnInit {
     this.analyticsCampaign = null;
   }
 
-  onCampaignUpdated(campaign: Campaign) {
-    if (campaign && campaign.id) {
-      const index = this.campaigns.findIndex(c => c && c.id === campaign.id);
-      if (index !== -1) {
-        this.campaigns[index] = campaign;
-        this.applyFilters();
-      }
-    }
-    this.showEditModal = false;
-    this.editingCampaign = null;
-  }
+ onCampaignUpdated(campaign: Campaign) {
+
+  this.campaigns = this.campaigns.map(c =>
+    c.id === campaign.id ? campaign : c
+  );
+
+  this.applyFilters();
+
+  this.showEditModal = false;
+  this.editingCampaign = null;
+}
+
 
   resetFilters() {
-    this.filters = { name: '', startDate: '', endDate: '', agency: '', buyer: '', brand: '' };
+    this.filters = { name: '', startDate: '', endDate: '', agencies: [], buyers: [], brands: [] };
     this.filteredCampaigns = this.campaigns;
     this.currentPage = 1;
     this.updatePagination();
+  }
+
+  toggleSelection(array: string[], value: string) {
+    const index = array.indexOf(value);
+    if (index > -1) {
+      array.splice(index, 1);
+    } else {
+      array.push(value);
+    }
+    this.applyFilters();
+  }
+
+  isSelected(array: string[], value: string): boolean {
+    return array.includes(value);
+  }
+
+  toggleDropdown(dropdown: 'agencies' | 'buyers' | 'brands') {
+    this.dropdownStates[dropdown] = !this.dropdownStates[dropdown];
+  }
+
+  closeDropdown(dropdown: 'agencies' | 'buyers' | 'brands') {
+    this.dropdownStates[dropdown] = false;
   }
 
   navigateToAddLead() {
@@ -276,46 +306,28 @@ export class CampaignDashboardComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
-  generateCampaignsCsv(campaigns: Campaign[]): string {
-    const headers = [
-      'Campaign Name',
-      'Start Date',
-      'End Date',
-      'Status',
-      'Agency',
-      'Buyer',
-      'Brand',
-      'Total Leads',
-      'Open Rate (%)',
-      'Click Rate (%)',
-      'Conversion Rate (%)',
-      'Revenue ($)'
-    ];
+ generateCampaignsCsv(campaigns: Campaign[]): string {
 
-    const rows = campaigns.map(campaign => [
-      campaign.name || '',
-      campaign.startDate || '',
-      campaign.endDate || '',
-      campaign.status || '',
-      campaign.agency || '',
-      campaign.buyer || '',
-      campaign.brand || '',
-      campaign.totalLeads || 0,
-      campaign.openRate || 0,
-      campaign.clickRate || 0,
-      campaign.conversionRate || 0,
-      campaign.revenue || 0
-    ]);
+  let csv = "Campaign Name,Start Date,End Date,Status,Agency,Buyer,Brand,Total Leads,Open Rate (%),Click Rate (%),Conversion Rate (%),Revenue ($)\n";
 
-    const csvRows = [headers, ...rows];
-    return csvRows.map(row => 
-      row.map(field => 
-        typeof field === 'string' && field.includes(',') 
-          ? `"${field}"` 
-          : field
-      ).join(',')
-    ).join('\n');
-  }
+  campaigns.forEach(c => {
+    csv +=
+      (c.name || "") + "," +
+      (c.startDate || "") + "," +
+      (c.endDate || "") + "," +
+      (c.status || "") + "," +
+      (c.agency || "") + "," +
+      (c.buyer || "") + "," +
+      (c.brand || "") + "," +
+      (c.totalLeads || 0) + "," +
+      (c.openRate || 0) + "," +
+      (c.clickRate || 0) + "," +
+      (c.conversionRate || 0) + "," +
+      (c.revenue || 0) + "\n";
+  });
+
+  return csv;
+}
 
   openCreateModal() {
     this.showCreateModal = true;
@@ -329,8 +341,8 @@ export class CampaignDashboardComponent implements OnInit {
     this.campaigns.unshift(campaign);
     this.filteredCampaigns = [...this.campaigns];
     this.showCreateModal = false;
-    this.loadCampaigns(); // Refresh to get updated counts
-    this.loadDropdownData(); // Refresh dropdown data
+    this.loadCampaigns(); 
+    this.loadDropdownData(); 
   }
 
   refreshData() {

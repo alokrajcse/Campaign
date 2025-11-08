@@ -29,19 +29,47 @@
       <input type="date" [(ngModel)]="filters.startDate" (change)="applyFilters()">
       <input type="date" [(ngModel)]="filters.endDate" (change)="applyFilters()">
     </div>
+    
     <div class="filter-row">
-      <select [(ngModel)]="filters.agency" (change)="applyFilters()">
-        <option value="">All Agencies</option>
-        <option *ngFor="let agency of agencies" [value]="agency">{{agency}}</option>
-      </select>
-      <select [(ngModel)]="filters.buyer" (change)="applyFilters()">
-        <option value="">All Buyers</option>
-        <option *ngFor="let buyer of buyers" [value]="buyer">{{buyer}}</option>
-      </select>
-      <select [(ngModel)]="filters.brand" (change)="applyFilters()">
-        <option value="">All Brands</option>
-        <option *ngFor="let brand of brands" [value]="brand">{{brand}}</option>
-      </select>
+      <div class="multi-select-dropdown">
+        <button class="dropdown-toggle" (click)="toggleDropdown('agencies')">
+          Agencies
+        </button>
+        <div class="dropdown-menu" *ngIf="dropdownStates.agencies">
+          <label *ngFor="let agency of agencies" class="dropdown-item">
+            <input type="checkbox" 
+                   [checked]="isSelected(filters.agencies, agency)"
+                   (change)="toggleSelection(filters.agencies, agency)">
+            {{agency}}
+          </label>
+        </div>
+      </div>
+      <div class="multi-select-dropdown">
+        <button class="dropdown-toggle" (click)="toggleDropdown('buyers')">
+          Buyers 
+        </button>
+        <div class="dropdown-menu" *ngIf="dropdownStates.buyers">
+          <label *ngFor="let buyer of buyers" class="dropdown-item">
+            <input type="checkbox" 
+                   [checked]="isSelected(filters.buyers, buyer)"
+                   (change)="toggleSelection(filters.buyers, buyer)">
+            {{buyer}}
+          </label>
+        </div>
+      </div>
+      <div class="multi-select-dropdown">
+        <button class="dropdown-toggle" (click)="toggleDropdown('brands')">
+          Brands 
+        </button>
+        <div class="dropdown-menu" *ngIf="dropdownStates.brands">
+          <label *ngFor="let brand of brands" class="dropdown-item">
+            <input type="checkbox" 
+                   [checked]="isSelected(filters.brands, brand)"
+                   (change)="toggleSelection(filters.brands, brand)">
+            {{brand}}
+          </label>
+        </div>
+      </div>
       <button (click)="resetFilters()">Reset</button>
     </div>
   </div>

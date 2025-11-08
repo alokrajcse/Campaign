@@ -17,11 +17,6 @@ export class Login {
 
   }
 
-  // login(){
-  //   this.auth.login({email: this.email, password:this.password}).subscribe({
-  //     next: () => this.router.navigate(['/dashboard']),
-  //       error: err => alert('Invalid login')
-  //   })
 
   login(){
       this.auth.login({email: this.email, password:this.password}).subscribe({

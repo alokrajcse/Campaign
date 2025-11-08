@@ -6,10 +6,17 @@
     </header>
 
     <div class="filters-section">
-      <input [(ngModel)]="filters.campaign" placeholder="Filter by Campaign" (input)="applyFilters()">
-      <input [(ngModel)]="filters.segment" placeholder="Filter by Segment" (input)="applyFilters()">
-      <input [(ngModel)]="filters.email" placeholder="Filter by Email" (input)="applyFilters()">
-      <button (click)="resetFilters()">Reset</button>
+      <div class="filter-inputs">
+        <input [(ngModel)]="filters.campaign" placeholder="Filter by Campaign" (input)="applyFilters()">
+        <input [(ngModel)]="filters.segment" placeholder="Filter by Segment" (input)="applyFilters()">
+        <input [(ngModel)]="filters.email" placeholder="Filter by Email" (input)="applyFilters()">
+        <button (click)="resetFilters()">Reset</button>
+      </div>
+      <div class="export-section">
+        <button class="export-btn" (click)="exportLeads()" [disabled]="filteredLeads.length === 0">
+          Export
+        </button>
+      </div>
     </div>
 
     <div class="leads-table" *ngIf="!loading">

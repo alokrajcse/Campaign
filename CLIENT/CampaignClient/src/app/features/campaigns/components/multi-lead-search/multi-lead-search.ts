@@ -65,13 +65,21 @@ export class MultiLeadSearchComponent {
             lead.email === identifier
           )) continue;
           
-          // Search by name (case insensitive partial match)
-          const leadByName = allLeads.find(lead => 
-            lead.name?.toLowerCase().includes(identifier.toLowerCase())
+          // Search by name, email, leadId, or campaign (case insensitive partial match)
+          const matchingLeads = allLeads.filter(lead => 
+            lead.name?.toLowerCase().includes(identifier.toLowerCase()) ||
+            lead.email?.toLowerCase().includes(identifier.toLowerCase()) ||
+            lead.leadId?.toLowerCase().includes(identifier.toLowerCase()) ||
+            lead.campaignId?.toLowerCase().includes(identifier.toLowerCase())
           );
           
-          if (leadByName) {
-            found.push(leadByName);
+          if (matchingLeads.length > 0) {
+            // Add all matching leads, avoiding duplicates
+            matchingLeads.forEach(lead => {
+              if (!found.some(f => f.leadId === lead.leadId)) {
+                found.push(lead);
+              }
+            });
           } else {
             notFound.push(identifier);
           }
@@ -103,7 +111,7 @@ export class MultiLeadSearchComponent {
   }
 
   private generateCSV(leads: Lead[]): string {
-    const headers = ['Lead ID', 'Name', 'Email', 'Phone', 'Campaign', 'Segment', 'Status', 'Created Date'];
+    const headers = ['Lead ID', 'Name', 'Email', 'Phone', 'Campaign', 'Segment', 'Status', 'Open Rate', 'Click Rate', 'Conversions', 'Created Date'];
     const rows = leads.map(lead => [
       lead.leadId || '',
       lead.name || '',
@@ -112,6 +120,9 @@ export class MultiLeadSearchComponent {
       lead.campaignId || '',
       lead.segment || '',
       lead.status || '',
+      lead.openRate || 0,
+      lead.clickRate || 0,
+      lead.conversions || 0,
       lead.createdDate ? new Date(lead.createdDate).toLocaleDateString() : ''
     ]);
     

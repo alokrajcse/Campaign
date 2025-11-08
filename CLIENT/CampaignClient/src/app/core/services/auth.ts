@@ -10,7 +10,6 @@ export class AuthService {
   private apiUrl='https://localhost:44392/api/Auth';
 
   constructor(private http: HttpClient){
-
   }
 
   signup(request: RegisterRequest): Observable<boolean>{
@@ -27,28 +26,22 @@ export class AuthService {
 
 
   }
-  // logout() {
-  //   localStorage.removeItem('token');
-  // }
+  
 
   isLoggedIn(): boolean {
-    const token = localStorage.getItem('token');
-    if (!token) return false;
-    
-    // Check if token is expired
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Math.floor(Date.now() / 1000);
-      if (payload.exp && payload.exp < currentTime) {
-        this.logout();
-        return false;
-      }
-      return true;
-    } catch {
-      this.logout();
-      return false;
-    }
+  const token = localStorage.getItem('token');
+  const expiry = localStorage.getItem('tokenExpiry'); 
+
+  if(!token) return false;
+
+  if(expiry && Date.now() > Number(expiry)){
+    this.logout();
+    return false;
   }
+
+  return true;
+}
+
 
   getUser() {
     const userData = localStorage.getItem('user');

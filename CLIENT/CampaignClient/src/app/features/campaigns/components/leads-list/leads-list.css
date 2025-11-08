@@ -21,19 +21,27 @@
 
 .filters-section {
   display: flex;
-  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filter-inputs {
+  display: flex;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
-.filters-section input {
+.filter-inputs input {
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   min-width: 200px;
 }
 
-.filters-section button {
+.filter-inputs button {
   padding: 0.5rem 1rem;
   background: #6c757d;
   color: white;
@@ -42,12 +50,30 @@
   cursor: pointer;
 }
 
-.export-btn {
-  background: #28a745 !important;
+.export-section {
+  display: flex;
+  align-items: center;
 }
 
-.export-btn:hover {
-  background: #218838 !important;
+.export-btn {
+  padding: 0.5rem 1rem;
+  background: #000000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.export-btn:hover:not(:disabled) {
+  background: #a0bfa7;
+}
+
+.export-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .leads-table {
@@ -168,12 +194,25 @@ th {
     gap: 10px;
   }
   
-  .filters-section input {
+  .filter-inputs {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filter-inputs input {
     min-width: auto;
     width: 100%;
   }
   
-  .filters-section button {
+  .filter-inputs button {
+    width: 100%;
+  }
+  
+  .export-section {
+    width: 100%;
+  }
+  
+  .export-btn {
     width: 100%;
   }
   
