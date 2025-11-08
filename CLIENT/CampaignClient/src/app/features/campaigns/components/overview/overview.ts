@@ -155,8 +155,19 @@ const config: ChartConfiguration = {
         this.campaignService.getLeads().subscribe({
           next: (leads) => {
             campaigns.forEach(campaign => {
-              const campaignLeads = leads.filter(lead => lead.campaignId === campaign.name);
+              const campaignLeads = leads.filter(lead => ((lead as any).CampaignId || lead.campaignId) === campaign.name);
               campaign.totalLeads = campaignLeads.length;
+              
+              // Calculate metrics from leads
+              if (campaignLeads.length > 0) {
+                const totalOpenRate = campaignLeads.reduce((sum, lead) => sum + (((lead as any).OpenRate || lead.openRate) || 0), 0);
+                const totalClickRate = campaignLeads.reduce((sum, lead) => sum + (((lead as any).ClickRate || lead.clickRate) || 0), 0);
+                const totalConversions = campaignLeads.reduce((sum, lead) => sum + (((lead as any).Conversions || lead.conversions) || 0), 0);
+                
+                campaign.openRate = Math.round((totalOpenRate / campaignLeads.length) * 100);
+                campaign.clickRate = Math.round(totalClickRate / campaignLeads.length);
+                campaign.conversionRate = Math.round((totalConversions / campaignLeads.length) * 100);
+              }
             });
             this.campaigns = campaigns;
             this.updateCampaignData();
