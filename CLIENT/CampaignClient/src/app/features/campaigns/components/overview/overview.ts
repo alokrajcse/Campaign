@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Chart, ChartConfiguration, registerables } from 'chart.js';
 import { NavigationComponent } from '../../../../shared/components/navigation/navigation';
 import { CampaignService } from '../../services/campaign.service';
-import { Campaign } from '../../../../core/models';
+import { Campaign } from '../../../../core/models/campaign';
 
 @Component({
   selector: 'app-overview',

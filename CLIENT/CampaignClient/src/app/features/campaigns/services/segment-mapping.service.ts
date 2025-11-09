@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Lead } from '../../../core/models';
+import { Lead } from '../../../core/models/lead';
 
 @Injectable({
   providedIn: 'root'

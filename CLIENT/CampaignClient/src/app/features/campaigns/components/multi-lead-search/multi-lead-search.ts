@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Lead, SearchResult } from '../../../../core/models';
+import { Lead } from '../../../../core/models/lead';
+import { SearchResult } from '../../../../core/models/search';
 import { CampaignService } from '../../services/campaign.service';
 import { NavigationComponent } from '../../../../shared/components/navigation/navigation';
 

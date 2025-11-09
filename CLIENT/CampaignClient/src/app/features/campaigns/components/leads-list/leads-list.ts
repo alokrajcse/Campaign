@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Lead } from '../../../../core/models';
+import { Lead } from '../../../../core/models/lead';
 import { CampaignService } from '../../services/campaign.service';
 import { NavigationComponent } from '../../../../shared/components/navigation/navigation';
 

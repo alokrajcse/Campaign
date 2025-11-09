@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Lead } from '../../../../core/models';
+import { Lead } from '../../../../core/models/lead';
 import { CampaignService } from '../../services/campaign.service';
 import { SegmentMappingService } from '../../services/segment-mapping.service';
 import { NavigationComponent } from '../../../../shared/components/navigation/navigation';
@@ -51,8 +51,6 @@ export class AddLeadComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load campaigns:', err);
-        // Fallback to default campaigns
-        this.campaigns = ['Summer Sale 2025', 'Corporate Offer', 'New Product Launch'];
       }
     });
   }
@@ -77,7 +75,6 @@ export class AddLeadComponent implements OnInit {
 
       console.log('Sending lead data:', lead);
 
-      // Check for existing lead with same email
       this.campaignService.getLeads().subscribe({
         next: (existingLeads) => {
           const duplicateEmail = existingLeads.find(l => l.email.toLowerCase() === lead.email.toLowerCase());
@@ -88,11 +85,9 @@ export class AddLeadComponent implements OnInit {
             return;
           }
           
-          // Proceed with adding lead if no duplicate
           this.addNewLead(lead);
         },
         error: () => {
-          // If can't check existing leads, proceed anyway
           this.addNewLead(lead);
         }
       });
@@ -142,13 +137,7 @@ export class AddLeadComponent implements OnInit {
       },
       error: (err) => {
         console.error('API Error:', err);
-        if (err.status === 500) {
-          this.message = 'Server error. The backend may be down or there\'s a data validation issue.';
-        } else if (err.status === 0) {
-          this.message = 'Cannot connect to server. Please check if the backend is running on https://localhost:44392';
-        } else {
-          this.message = `Error: ${err.error?.message || err.message || 'Unknown error occurred'}`;
-        }
+       
         this.messageType = 'error';
         this.loading = false;
       }

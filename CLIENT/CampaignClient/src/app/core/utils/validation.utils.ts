@@ -11,9 +11,9 @@ export class ValidationUtils {
     return /^[A-Z]\d{3,}$/.test(leadId);
   }
 
-  static sanitizeInput(input: string): string {
-    return input.trim().replace(/[<>]/g, '');
-  }
+  // static sanitizeInput(input: string): string {
+  //   return input.trim().replace(/[<>]/g, '');
+  // }
 
   static validateRequired(value: any): boolean {
     return value !== null && value !== undefined && value !== '';

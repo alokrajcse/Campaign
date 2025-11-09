@@ -2,7 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Campaign, Lead, BulkUploadResult, SearchResult } from '../../../core/models';
+import { Campaign } from '../../../core/models/campaign';
+import { Lead } from '../../../core/models/lead';
+import { BulkUploadResult } from '../../../core/models/bulk-upload';
+import { SearchResult } from '../../../core/models/search';
 import { APP_CONSTANTS } from '../../../core/constants/app.constants';
 
 @Injectable({

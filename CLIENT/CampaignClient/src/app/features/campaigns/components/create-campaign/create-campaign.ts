@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Campaign } from '../../../../core/models';
+import { Campaign } from '../../../../core/models/campaign';
 import { CampaignService } from '../../services/campaign.service';
 
 @Component({

@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { Lead, BulkUploadResult } from '../../../../core/models';
+import { Lead } from '../../../../core/models/lead';
+import { BulkUploadResult } from '../../../../core/models/bulk-upload';
 import { CampaignService } from '../../services/campaign.service';
 import { SegmentMappingService } from '../../services/segment-mapping.service';
 import { NavigationComponent } from '../../../../shared/components/navigation/navigation';

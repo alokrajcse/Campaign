@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Campaign } from '../../../../core/models';
+import { Campaign } from '../../../../core/models/campaign';
 import { CampaignService } from '../../services/campaign.service';
 
 @Component({
