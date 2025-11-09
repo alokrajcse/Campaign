@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
 import { Organization } from '../../core/models/auth';
 
@@ -20,7 +20,7 @@ export class Register implements OnInit {
   organizations: Organization[] = [];
   errors: any = {};
 
-  constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit() {
     this.loadOrganizations();
@@ -66,7 +66,10 @@ export class Register implements OnInit {
     
     this.auth.signup({username: this.username, email: this.email, password: this.password, organizationId: this.organizationId})
     .subscribe({
-      next: () => alert('Registration successful'),
+      next: () => {
+        alert('Registration successful');
+        this.router.navigate(['/login']);
+      },
       error: (e: any) => alert("Error: " + e.message)
     });
   }
