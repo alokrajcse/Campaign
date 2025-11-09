@@ -14,7 +14,6 @@ namespace campaignServer.Services
             _context = context;
         }
 
-        // Get campaigns for user's organization only
         public async Task<List<Campaign>> GetByOrganizationAsync(int organizationId)
         {
             return await _context.Campaigns
@@ -22,14 +21,12 @@ namespace campaignServer.Services
                 .ToListAsync();
         }
 
-        // Get single campaign (check organization ownership)
         public async Task<Campaign?> GetByIdAsync(int id, int organizationId)
         {
             return await _context.Campaigns
                 .FirstOrDefaultAsync(c => c.Id == id && c.OrganizationId == organizationId);
         }
 
-        // Create new campaign for user's organization
         public async Task<Campaign> AddAsync(Campaign campaign, int organizationId)
         {
             campaign.OrganizationId = organizationId;
@@ -39,7 +36,6 @@ namespace campaignServer.Services
             return campaign;
         }
 
-        // Update campaign
         public async Task<Campaign> UpdateAsync(Campaign campaign)
         {
             _context.Campaigns.Update(campaign);
@@ -47,7 +43,6 @@ namespace campaignServer.Services
             return campaign;
         }
 
-        // Delete campaign
         public async Task<bool> DeleteAsync(int id)
         {
             var campaign = await _context.Campaigns.FindAsync(id);
@@ -58,7 +53,6 @@ namespace campaignServer.Services
             return true;
         }
 
-        // Filter campaigns by organization and other criteria
         public async Task<List<Campaign>> GetFilteredAsync(int organizationId, string? name)
         {
             var campaigns = await _context.Campaigns
@@ -73,18 +67,15 @@ namespace campaignServer.Services
             return campaigns;
         }
 
-        // Get campaign analytics
         public async Task<CampaignAnalyticsResponseDto?> GetCampaignAnalyticsAsync(int campaignId, int organizationId)
         {
             var campaign = await GetByIdAsync(campaignId, organizationId);
             if (campaign == null) return null;
 
-            // Get leads for this campaign from same organization
             var leads = await _context.Leads
                 .Where(l => l.CampaignId == campaign.Name && l.OrganizationId == organizationId)
                 .ToListAsync();
             
-            // Simple calculations
             var totalLeads = leads.Count;
             var openedEmails = leads.Count(l => l.OpenRate > 0);
             var clickedLeads = leads.Count(l => l.ClickRate > 0);

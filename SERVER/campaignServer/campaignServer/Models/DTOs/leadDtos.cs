@@ -23,10 +23,9 @@ namespace campaignServer.Models.DTOs
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
         
-        // Engagement Metrics
-        public int OpenRate { get; set; } = 0;      // 1 if opened, 0 if not
-        public int ClickRate { get; set; } = 0;     // Number of clicks on marketing links
-        public int Conversions { get; set; } = 0;   // 1 if converted, 0 if not
+        public int OpenRate { get; set; } = 0;     
+        public int ClickRate { get; set; } = 0;    
+        public int Conversions { get; set; } = 0;  
         public DateTime? LastEngagementDate { get; set; }
     }
 
@@ -61,8 +60,8 @@ namespace campaignServer.Models.DTOs
 
     public class MultiLeadSearchRequestDto
     {
-        public List<string>? Identifiers { get; set; } // LeadIds or Emails
-        public string? RawInput { get; set; } // multi-line input
+        public List<string>? Identifiers { get; set; } 
+        public string? RawInput { get; set; } 
     }
 
     public class MultiLeadSearchResponseDto

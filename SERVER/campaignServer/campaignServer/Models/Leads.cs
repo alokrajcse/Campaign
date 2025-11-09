@@ -15,7 +15,6 @@ namespace campaignServer.Models
         public string? Segment { get; set; }
         public string? Status { get; set; } = "Active";
 
-        // Engagement Metrics
         public int OpenRate { get; set; } = 0;
         public int ClickRate { get; set; } = 0;
         public int Conversions { get; set; } = 0;
@@ -27,51 +26,5 @@ namespace campaignServer.Models
 
 
 
-    //public class Leads
-    //{
-    //    [Table("leads")]
-    //    public class Lead
-    //    {
-    //        [Key]
-    //        [Column("id")]
-    //        public int Id { get; set; }
-
-    //        [Required]
-    //        [Column("lead_code")]
-    //        [MaxLength(100)]
-    //        public string LeadCode { get; set; } // maps from leadId in DTO
-
-    //        [Required]
-    //        [Column("name")]
-    //        [MaxLength(150)]
-    //        public string Name { get; set; }
-
-    //        [Required]
-    //        [Column("email")]
-    //        [MaxLength(150)]
-    //        public string Email { get; set; }
-
-    //        [Column("phone")]
-    //        [MaxLength(20)]
-    //        public string Phone { get; set; }
-
-    //        [Column("country_code")]
-    //        [MaxLength(10)]
-    //        public string CountryCode { get; set; }
-
-    //        [Column("segment")]
-    //        [MaxLength(100)]
-    //        public string Segment { get; set; }
-
-    //        [Column("campaign_id")]
-    //        public int? CampaignId { get; set; }
-
-    //        [Column("created_at")]
-    //        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    //        [Column("updated_at")]
-    //        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    //    }
-    //}
-
+   
 }

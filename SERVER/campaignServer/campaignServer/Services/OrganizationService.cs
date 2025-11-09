@@ -13,7 +13,6 @@ namespace campaignServer.Services
             _context = context;
         }
 
-        // Get all organizations for signup dropdown
         public async Task<List<Organization>> GetAllAsync()
         {
             return await _context.Organizations.ToListAsync();

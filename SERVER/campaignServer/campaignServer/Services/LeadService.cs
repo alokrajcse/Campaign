@@ -13,7 +13,6 @@ namespace campaignServer.Services
             _context = context;
         }
 
-        // Get all leads for user's organization
         public async Task<List<Lead>> GetByOrganizationAsync(int organizationId)
         {
             return await _context.Leads
@@ -21,14 +20,12 @@ namespace campaignServer.Services
                 .ToListAsync();
         }
 
-        // Get single lead (check organization ownership)
         public async Task<Lead?> GetByIdAsync(string leadId, int organizationId)
         {
             return await _context.Leads
                 .FirstOrDefaultAsync(l => l.LeadId == leadId && l.OrganizationId == organizationId);
         }
 
-        // Create new lead for user's organization
         public async Task<Lead> AddAsync(Lead lead, int organizationId)
         {
             lead.CreatedDate = DateTime.UtcNow;
@@ -39,7 +36,6 @@ namespace campaignServer.Services
             return lead;
         }
 
-        // Update lead
         public async Task<Lead> UpdateAsync(Lead lead)
         {
             lead.UpdatedDate = DateTime.UtcNow;
@@ -48,7 +44,6 @@ namespace campaignServer.Services
             return lead;
         }
 
-        // Delete lead (check organization ownership)
         public async Task<bool> DeleteAsync(string leadId, int organizationId)
         {
             var lead = await GetByIdAsync(leadId, organizationId);
@@ -59,7 +54,6 @@ namespace campaignServer.Services
             return true;
         }
 
-        // Filter leads by organization and campaign
         public async Task<List<Lead>> GetByFilterAsync(int organizationId, string? campaignId)
         {
             var leads = await _context.Leads
@@ -74,7 +68,6 @@ namespace campaignServer.Services
             return leads;
         }
 
-        // Add multiple leads for user's organization
         public async Task<List<Lead>> AddBulkAsync(List<Lead> leads, int organizationId)
         {
             foreach (var lead in leads)

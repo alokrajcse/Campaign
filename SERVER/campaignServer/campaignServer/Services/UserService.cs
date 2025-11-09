@@ -45,7 +45,7 @@ namespace campaignServer.Services
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user == null) return null;
 
-            // ✅ Verify password using BCrypt
+            // Verify password using BCrypt
             bool isValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
             if (!isValid) return null;
 
