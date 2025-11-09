@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Campaign } from '../../../core/models/campaign';
 import { Lead } from '../../../core/models/lead';
 import { BulkUploadResult } from '../../../core/models/bulk-upload';
@@ -16,24 +15,8 @@ export class CampaignService {
 
   constructor(private http: HttpClient) {}
 
-  getCampaigns(filters?: any): Observable<Campaign[]> {
-    let params = new HttpParams();
-    if (filters) {
-      if (filters.name) params = params.set('name', filters.name);
-      if (filters.startDate) params = params.set('startDate', filters.startDate);
-      if (filters.endDate) params = params.set('endDate', filters.endDate);
-      if (filters.agency) params = params.set('agency', filters.agency);
-      if (filters.buyer) params = params.set('buyer', filters.buyer);
-      if (filters.brand) params = params.set('brand', filters.brand);
-      if (filters.status) params = params.set('status', filters.status);
-    }
-    return this.http.get<Campaign[]>(`${this.apiUrl}/Campaigns`, { params }).pipe(
-      map(campaigns => campaigns.map(campaign => ({
-        ...campaign,
-        clickRate: campaign.clickRate || Math.floor(Math.random() * 30) + 10,
-        revenue: campaign.revenue || Math.floor(Math.random() * 50000) + 10000
-      })))
-    );
+  getCampaigns(): Observable<Campaign[]> {
+    return this.http.get<Campaign[]>(`${this.apiUrl}/Campaigns`);
   }
 
   createCampaign(campaign: Campaign): Observable<Campaign> {
@@ -66,12 +49,10 @@ export class CampaignService {
     return this.http.get<Lead>(`${this.apiUrl}/Leads/${leadId}`);
   }
 
-  getLeads(filters?: any): Observable<Lead[]> {
+  getLeads(filters?: { campaignId?: string }): Observable<Lead[]> {
     let params = new HttpParams();
-    if (filters) {
-      if (filters.campaignId) params = params.set('campaignId', filters.campaignId);
-      if (filters.segment) params = params.set('segment', filters.segment);
-      if (filters.email) params = params.set('email', filters.email);
+    if (filters?.campaignId) {
+      params = params.set('campaignId', filters.campaignId);
     }
     return this.http.get<Lead[]>(`${this.apiUrl}/Leads`, { params });
   }
@@ -102,13 +83,7 @@ export class CampaignService {
   }
 
   getDropdownData(): Observable<{agencies: string[], buyers: string[], brands: string[]}> {
-    return this.http.get<{agencies: string[], buyers: string[], brands: string[]}>(`${this.apiUrl}/Campaigns/dropdown-data`).pipe(
-      map(data => data || {
-        agencies: ['Agency A', 'Agency B', 'Agency C'],
-        buyers: ['Buyer X', 'Buyer Y', 'Buyer Z'],
-        brands: ['Brand One', 'Brand Two', 'Brand Three']
-      })
-    );
+    return this.http.get<{agencies: string[], buyers: string[], brands: string[]}>(`${this.apiUrl}/Campaigns/dropdown-data`);
   }
 
   updateLeadCampaign(leadId: string, campaignName: string): Observable<Lead> {
