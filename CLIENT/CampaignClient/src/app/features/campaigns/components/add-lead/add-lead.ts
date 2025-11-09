@@ -92,15 +92,15 @@ export class AddLeadComponent implements OnInit {
         }
       });
     } else {
-      this.markFormGroupTouched();
+      // this.markFormGroupTouched();
     }
   }
 
-  markFormGroupTouched() {
-    Object.keys(this.leadForm.controls).forEach(key => {
-      this.leadForm.get(key)?.markAsTouched();
-    });
-  }
+  // markFormGroupTouched() {
+  //   Object.keys(this.leadForm.controls).forEach(key => {
+  //     this.leadForm.get(key)?.markAsTouched();
+  //   });
+  // }
 
   getFieldError(fieldName: string): string {
     const field = this.leadForm.get(fieldName);
