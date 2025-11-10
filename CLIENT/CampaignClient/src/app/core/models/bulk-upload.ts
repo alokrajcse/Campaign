@@ -1,6 +1,7 @@
 export interface BulkUploadResult {
-  processed: number;
-  updated: number;
-  rejected: number;
-  errors: string[];
+  message: string;
+  leads: any[];
+  successCount?: number;
+  failedCount?: number;
+  totalRows?: number;
 }

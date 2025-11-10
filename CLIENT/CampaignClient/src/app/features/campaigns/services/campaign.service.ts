@@ -57,9 +57,8 @@ export class CampaignService {
     return this.http.get<Lead[]>(`${this.apiUrl}/Leads`, { params });
   }
 
-  bulkUploadLeads(leads: Lead[], options = { overwriteExisting: true }): Observable<BulkUploadResult> {
-    const payload = { leads, options };
-    return this.http.post<BulkUploadResult>(`${this.apiUrl}/Leads/bulk`, payload);
+  bulkUploadLeads(leads: Lead[]): Observable<BulkUploadResult> {
+    return this.http.post<BulkUploadResult>(`${this.apiUrl}/Leads/bulk`, leads);
   }
 
   searchLeads(identifiers: string[], rawInput: string = ''): Observable<SearchResult> {

@@ -154,12 +154,29 @@ parseFile() {
     if (this.validationErrors.length > 0) return;
 
     this.isProcessing = true;
+    const totalRows = this.previewData.length;
+    
     this.campaignService.bulkUploadLeads(this.previewData).subscribe({
       next: (result) => {
-        this.uploadResult = result;
+        const successCount = result.leads?.length || 0;
+        const failedCount = totalRows - successCount;
+        
+        this.uploadResult = {
+          ...result,
+          successCount,
+          failedCount,
+          totalRows
+        };
         this.isProcessing = false;
       },
       error: () => {
+        this.uploadResult = {
+          message: 'Upload failed',
+          leads: [],
+          successCount: 0,
+          failedCount: totalRows,
+          totalRows
+        };
         this.isProcessing = false;
       }
     });

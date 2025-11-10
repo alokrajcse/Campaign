@@ -36,28 +36,13 @@ export class CampaignAnalyticsComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.loadMockData();
+        // this.loadMockData();
         this.loading = false;
       }
     });
   }
 
-  loadMockData() {
-    this.campaignService.getLeads({ campaignId: this.campaign.name }).subscribe({
-      next: (leads) => {
-        this.calculateSegmentData(leads);
-        this.calculateMetrics(leads);
-      },
-      error: () => {
-        this.segmentData = [
-          { name: 'Corporate', count: Math.floor((this.campaign.totalLeads || 0) * 0.4), percentage: 40 },
-          { name: 'General Public', count: Math.floor((this.campaign.totalLeads || 0) * 0.35), percentage: 35 },
-          { name: 'Seasonal', count: Math.floor((this.campaign.totalLeads || 0) * 0.15), percentage: 15 },
-          { name: 'Early Adopters', count: Math.floor((this.campaign.totalLeads || 0) * 0.1), percentage: 10 }
-        ];
-      }
-    });
-  }
+
 
   calculateSegmentData(leads: any[]) {
     const segments: any = {};
@@ -94,14 +79,7 @@ export class CampaignAnalyticsComponent implements OnInit {
     return revenue.toLocaleString();
   }
 
-  getStatusIcon(status: string | undefined): string {
-    switch(status) {
-      case 'Active': return '🟢';
-      case 'Completed': return '✅';
-      case 'Draft': return '📝';
-      default: return '⚪';
-    }
-  }
+
 
   getCampaignDuration(): number {
     const start = new Date(this.campaign.startDate);

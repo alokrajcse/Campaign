@@ -66,15 +66,9 @@
     <div class="upload-result" *ngIf="uploadResult">
       <h3>Upload Summary</h3>
       <div class="result-stats">
-        <div class="stat success">Processed: {{uploadResult.processed}}</div>
-        <div class="stat warning">Updated: {{uploadResult.updated}}</div>
-        <div class="stat error">Rejected: {{uploadResult.rejected}}</div>
-      </div>
-      <div class="result-errors" *ngIf="uploadResult.errors.length > 0">
-        <h4>Errors:</h4>
-        <ul>
-          <li *ngFor="let error of uploadResult.errors">{{error}}</li>
-        </ul>
+        <div class="stat success">Successfully Uploaded: {{uploadResult.successCount || 0}}</div>
+        <div class="stat error">Failed: {{uploadResult.failedCount || 0}}</div>
+        <div class="stat info">Total Rows: {{uploadResult.totalRows || 0}}</div>
       </div>
     </div>
   </div>
