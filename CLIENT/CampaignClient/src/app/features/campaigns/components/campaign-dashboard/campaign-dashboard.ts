@@ -210,7 +210,6 @@ export class CampaignDashboardComponent implements OnInit {
   updateCampaignStatus(campaign: Campaign, event: any) {
     const newStatus = event.target.value as 'Active' | 'Completed' | 'Draft';
     campaign.status = newStatus;
-    // In real app, call API to update status
     console.log(`Campaign ${campaign.name} status updated to ${newStatus}`);
   }
 
@@ -230,9 +229,17 @@ export class CampaignDashboardComponent implements OnInit {
         next: () => {
           this.campaigns = this.campaigns.filter(c => c.id !== campaign.id);
           this.applyFilters();
+          this.error = '';
         },
-        error: () => {
-          this.error = 'Failed to delete campaign';
+        error: (err) => {
+          if (err.status === 200) {
+            this.campaigns = this.campaigns.filter(c => c.id !== campaign.id);
+            this.applyFilters();
+            this.error = '';
+          } else {
+            console.error('Delete error:', err);
+            this.error = 'Failed to delete campaign';
+          }
         }
       });
     }

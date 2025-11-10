@@ -36,14 +36,15 @@ export class MultiLeadSearchComponent {
     
     // First try backend search
     this.campaignService.searchLeads(identifiers, this.searchInput).subscribe({
-      next: (result) => {
-        // If backend search doesn't find all, search by name locally
-        if (result.notFound && result.notFound.length > 0) {
-          this.searchByName(result, identifiers);
-        } else {
-          this.searchResult = result || { found: [], notFound: identifiers };
-          this.isSearching = false;
-        }
+      next: (result: any) => {
+        // Map backend response to expected format
+        const mappedResult = {
+          found: result.foundLeads || [],
+          notFound: result.notFoundIdentifiers || []
+        };
+        
+        this.searchResult = mappedResult;
+        this.isSearching = false;
       },
       error: (err) => {
         console.error('Search error:', err);
@@ -57,7 +58,7 @@ export class MultiLeadSearchComponent {
     this.campaignService.getLeads().subscribe({
       next: (allLeads) => {
         const found = [...(initialResult.found || [])];
-        const notFound = [];
+        const notFound: string[] = [];
         
         for (const identifier of identifiers) {
           // Skip if already found by backend
@@ -86,11 +87,11 @@ export class MultiLeadSearchComponent {
           }
         }
         
-        this.searchResult = { found, notFound };
+        this.searchResult = { found: found || [], notFound: notFound || [] };
         this.isSearching = false;
       },
       error: () => {
-        this.searchResult = initialResult;
+        this.searchResult = { found: initialResult.found || [], notFound: initialResult.notFound || [] };
         this.isSearching = false;
       }
     });

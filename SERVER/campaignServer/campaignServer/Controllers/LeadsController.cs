@@ -91,6 +91,41 @@ namespace campaignServer.Controllers
             return BadRequest("Unsupported format");
         }
 
+        [HttpPost("multi-search")]
+        public async Task<IActionResult> MultiSearch([FromBody] MultiSearchRequest request)
+        {
+            var organizationId = GetUserOrganizationId();
+            var allLeads = await _service.GetByOrganizationAsync(organizationId);
+            
+            var foundLeads = new List<Lead>();
+            var notFoundIdentifiers = new List<string>();
+            
+            foreach (var identifier in request.Identifiers)
+            {
+                var lead = allLeads.FirstOrDefault(l => 
+                    l.LeadId.Equals(identifier, StringComparison.OrdinalIgnoreCase) ||
+                    l.Name.Contains(identifier, StringComparison.OrdinalIgnoreCase) ||
+                    l.Email.Equals(identifier, StringComparison.OrdinalIgnoreCase));
+                
+                if (lead != null && !foundLeads.Any(f => f.LeadId == lead.LeadId))
+                {
+                    foundLeads.Add(lead);
+                }
+                else if (lead == null)
+                {
+                    notFoundIdentifiers.Add(identifier);
+                }
+            }
+            
+            return Ok(new
+            {
+                FoundLeads = foundLeads,
+                NotFoundIdentifiers = notFoundIdentifiers,
+                TotalFound = foundLeads.Count,
+                TotalNotFound = notFoundIdentifiers.Count
+            });
+        }
+
         private string GenerateCsv(IEnumerable<Lead> leads)
         {
             var csv = new System.Text.StringBuilder();
@@ -102,6 +137,12 @@ namespace campaignServer.Controllers
             }
             
             return csv.ToString();
+        }
+
+        public class MultiSearchRequest
+        {
+            public List<string> Identifiers { get; set; } = new();
+            public string RawInput { get; set; } = string.Empty;
         }
     }
 }
