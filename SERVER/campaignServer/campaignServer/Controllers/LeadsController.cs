@@ -74,5 +74,34 @@ namespace campaignServer.Controllers
             if (!deleted) return NotFound();
             return Ok("Lead deleted successfully");
         }
+
+        [HttpGet("export")]
+        public async Task<IActionResult> Export([FromQuery] string format = "csv", [FromQuery] string? campaignId = null)
+        {
+            var organizationId = GetUserOrganizationId();
+            var leads = await _service.GetByFilterAsync(organizationId, campaignId);
+            
+            if (format.ToLower() == "csv")
+            {
+                var csv = GenerateCsv(leads);
+                var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
+                return File(bytes, "text/csv", $"leads-{campaignId ?? "all"}.csv");
+            }
+            
+            return BadRequest("Unsupported format");
+        }
+
+        private string GenerateCsv(IEnumerable<Lead> leads)
+        {
+            var csv = new System.Text.StringBuilder();
+            csv.AppendLine("LeadId,Name,Email,Phone,CampaignId,Segment,Status,CreatedDate");
+            
+            foreach (var lead in leads)
+            {
+                csv.AppendLine($"{lead.LeadId},{lead.Name},{lead.Email},{lead.Phone},{lead.CampaignId},{lead.Segment},{lead.Status},{lead.CreatedDate:yyyy-MM-dd}");
+            }
+            
+            return csv.ToString();
+        }
     }
 }
