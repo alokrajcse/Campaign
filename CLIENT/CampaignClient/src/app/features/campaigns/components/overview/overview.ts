@@ -42,7 +42,6 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Clean up charts and intervals
     this.charts.forEach(chart => chart.destroy());
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -52,7 +51,6 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
   private createCharts() {
     this.createCampaignPerformanceChart();
     this.createLeadSegmentChart();
-    // this.createEngagementTrendChart();
   }
 
   private createCampaignPerformanceChart() {
@@ -85,30 +83,30 @@ const config: ChartConfiguration = {
       title: {
         display: true,
         text: 'Campaign Performance',
-        color: '#ffffff'  // White title text color
+        color: '#ffffff'  
       },
       legend: {
         labels: {
-          color: '#ffffff'  // White text color for legend labels
+          color: '#ffffff'  
         }
       },
       tooltip: {
-        titleColor: '#ffffff',  // White tooltip title color
-        bodyColor: '#ffffff',   // White tooltip body text color
-        backgroundColor: '#333333',  // Optional: Dark background color for tooltips for contrast
+        titleColor: '#ffffff', 
+        bodyColor: '#ffffff',  
+        backgroundColor: '#333333', 
       }
     },
     scales: {
       x: {
         ticks: {
-          color: '#ffffff',  // White text color for X-axis labels
+          color: '#ffffff', 
         }
       },
       y: {
         beginAtZero: true,
         max: 100,
         ticks: {
-          color: '#ffffff',  // White text color for Y-axis labels
+          color: '#ffffff',  
         }
       }
     }
@@ -118,34 +116,94 @@ const config: ChartConfiguration = {
 
     this.charts.push(new Chart(ctx, config));
   }
+private createLeadSegmentChart() {
+  const ctx = document.getElementById('segmentChart') as HTMLCanvasElement;
+  if (!ctx) return;
 
-  private createLeadSegmentChart() {
-    const ctx = document.getElementById('segmentChart') as HTMLCanvasElement;
-    if (!ctx) return;
+  this.campaignService.getLeads().subscribe({
+    next: (leads) => {
+      const segmentCounts: { [key: string]: number } = {};
+      
+      leads.forEach(lead => {
+        const segment = (lead as any).Segment || lead.segment || 'General';
+        segmentCounts[segment] = (segmentCounts[segment] || 0) + 1;
+      });
 
-    const config: ChartConfiguration = {
-      type: 'doughnut',
-      data: {
-        labels: ['Corporate', 'General Public', 'Students', 'Early Adopters'],
-        datasets: [{
-          data: [35, 40, 15, 10],
-          backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#8b5cf6'],
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          title: {
-            display: true,
-            text: 'Lead Segments Distribution'
+      const labels = Object.keys(segmentCounts);
+      const data = Object.values(segmentCounts);
+      const colors = ['#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4'];
+
+      const config: ChartConfiguration = {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: colors.slice(0, labels.length),
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Lead Segments Distribution',
+              color: '#ffffff'
+            },
+            legend: {
+              labels: {
+                color: '#ffffff'
+              }
+            },
+            tooltip: {
+              titleColor: '#ffffff',
+              bodyColor: '#ffffff',
+              footerColor: '#ffffff'
+            }
           }
         }
-      }
-    };
+      };
 
-    this.charts.push(new Chart(ctx, config));
-  }
+      this.charts.push(new Chart(ctx, config));
+    },
+    error: () => {
+      const config: ChartConfiguration = {
+        type: 'doughnut',
+        data: {
+          labels: ['General'],
+          datasets: [{
+            data: [100],
+            backgroundColor: ['#ef4444'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Lead Segments Distribution',
+              color: '#ffffff'
+            },
+            legend: {
+              labels: {
+                color: '#ffffff'
+              }
+            },
+            tooltip: {
+              titleColor: '#ffffff',
+              bodyColor: '#ffffff',
+              footerColor: '#ffffff'
+            }
+          }
+        }
+      };
+      this.charts.push(new Chart(ctx, config));
+    }
+  });
+}
+
 
   
 
@@ -158,7 +216,6 @@ const config: ChartConfiguration = {
               const campaignLeads = leads.filter(lead => ((lead as any).CampaignId || lead.campaignId) === campaign.name);
               campaign.totalLeads = campaignLeads.length;
               
-              // Calculate metrics from leads
               if (campaignLeads.length > 0) {
                 const totalOpenRate = campaignLeads.reduce((sum, lead) => sum + (((lead as any).OpenRate || lead.openRate) || 0), 0);
                 const totalClickRate = campaignLeads.reduce((sum, lead) => sum + (((lead as any).ClickRate || lead.clickRate) || 0), 0);
@@ -171,10 +228,6 @@ const config: ChartConfiguration = {
             });
             this.campaigns = campaigns;
             this.updateCampaignData();
-            // Recreate charts with new data
-            if (this.charts.length > 0) {
-              this.updateCharts();
-            }
           },
           error: () => {
             this.campaigns = campaigns;
