@@ -4,14 +4,12 @@ namespace campaignServer.Controllers
 {
     public class BaseController : ControllerBase
     {
-        // Get user's organization ID from JWT token
         protected int GetUserOrganizationId()
         {
             var orgId = User.FindFirst("OrganizationId")?.Value;
             return int.Parse(orgId ?? "0");
         }
 
-        // Get user's ID from JWT token
         protected int GetUserId()
         {
             var userId = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
