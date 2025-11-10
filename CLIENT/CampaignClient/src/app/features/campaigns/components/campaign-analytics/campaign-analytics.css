@@ -130,7 +130,7 @@
 }
 
 .segment-percentage {
-  color: #007bff;
+  color: #000000;
   font-weight: bold;
   font-size: 12px;
 }
@@ -179,9 +179,9 @@
 }
 
 .btn-primary {
-  background: #007bff;
+  background: #000000;
   color: white;
-  border-color: #007bff;
+  border-color: #000000;
 }
 
 .btn-secondary {
