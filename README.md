@@ -182,11 +182,11 @@ L002,Alok Raj,alokraj@email.com,+91987654321,Campaign A
 
 ### Prerequisites
 - **Node.js (v18 or higher)** – Required for Angular frontend.
-  📥 Download: https://nodejs.org/
+   Download: https://nodejs.org/
 - **.NET 8.0 SDK** – Required for backend API.
-  📥 Download: https://dotnet.microsoft.com/
+   Download: https://dotnet.microsoft.com/
 - **MySQL Server** – For database storage.
-  📥 Download: https://dev.mysql.com/downloads/
+   Download: https://dev.mysql.com/downloads/
 - **Angular CLI** – Install globally with:
   npm install -g @angular/cli
 
