@@ -14,7 +14,7 @@ import { Campaign } from '../../../../core/models/campaign';
 })
 export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
   private charts: Chart[] = [];
-  private intervalId: any;
+
 
   campaigns: Campaign[] = [];
   campaignData = {
@@ -30,7 +30,6 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit() {
     this.loadCampaignData();
-    this.startRealTimeUpdates();
   }
 
   ngAfterViewInit() {
@@ -43,9 +42,6 @@ export class OverviewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.charts.forEach(chart => chart.destroy());
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
   }
 
   private createCharts() {
@@ -243,7 +239,6 @@ private createLeadSegmentChart() {
     this.campaignData.totalLeads = this.campaigns.reduce((total, campaign) => total + (campaign.totalLeads || 0), 0);
     this.campaignData.openRate = this.getAvgOpenRate();
     this.campaignData.conversionRate = this.getAvgConversionRate();
-    this.updateCharts();
   }
 
   private getAvgOpenRate(): number {
@@ -268,11 +263,7 @@ private createLeadSegmentChart() {
     }, 100);
   }
 
-  private startRealTimeUpdates() {
-    this.intervalId = setInterval(() => {
-      this.loadCampaignData();
-    }, 3000); // Reduced to 3 seconds
-  }
+
 
   refreshData() {
     this.loadCampaignData();
